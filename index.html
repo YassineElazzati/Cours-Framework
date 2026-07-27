@@ -1,0 +1,1993 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Frameworks &amp; architectures logicielles — Séance passerelle</title>
+<style>
+:root{
+  --bg:#fbfbfc;
+  --paper:#ffffff;
+  --ink:#151a21;
+  --body:#2b323b;
+  --muted:#6a7381;
+  --line:#e2e6ec;
+  --line-strong:#c8cfd9;
+  --line-soft:#eef1f5;
+  --accent:#33447e;
+  --accent-soft:#edf0f8;
+  --accent-line:#c9d2e8;
+
+  --code-bg:#f7f8fa;
+  --kw:#7c3aed;
+  --str:#15803d;
+  --com:#8d959f;
+  --num:#b45309;
+  --typ:#0369a1;
+  --fn:#1d4ed8;
+
+  --warn-bg:#fffbeb; --warn-line:#d97706; --warn-ink:#8a5209;
+  --tip-bg:#eff6ff;  --tip-line:#2563eb;  --tip-ink:#1e3a8a;
+  --recall-bg:#f6f4fd; --recall-line:#7c3aed; --recall-ink:#5b21b6;
+  --key-bg:#ecfdf5;  --key-line:#059669;  --key-ink:#065f46;
+  --meta-bg:#faf9fc; --meta-line:#d9d2e6; --meta-ink:#584d6e;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--body);
+  font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-size:17px;
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+/* Barre de progression de lecture */
+.progress{
+  position:fixed;top:0;left:0;height:3px;width:0;
+  background:var(--accent);z-index:60;
+}
+
+.svg-defs{position:absolute;width:0;height:0;overflow:hidden}
+
+.layout{
+  max-width:1180px;
+  margin:0 auto;
+  padding:0 28px 110px;
+  display:flex;
+  gap:64px;
+  align-items:flex-start;
+}
+
+/* ---------- Sommaire ---------- */
+.toc{
+  position:sticky;
+  top:0;
+  width:252px;
+  flex:0 0 252px;
+  max-height:100vh;
+  overflow-y:auto;
+  padding:44px 0 44px;
+  font-size:13.5px;
+}
+.toc summary{display:none}
+.toc-title{
+  font-size:10.5px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--muted);
+  font-weight:700;
+  margin:0 0 14px;
+  padding-bottom:11px;
+  border-bottom:1px solid var(--line);
+}
+.toc ol{list-style:none;margin:0;padding:0;counter-reset:toc}
+.toc li{counter-increment:toc}
+.toc a{
+  display:flex;
+  gap:9px;
+  padding:6px 8px 6px 11px;
+  color:var(--muted);
+  text-decoration:none;
+  border-left:2px solid transparent;
+  line-height:1.35;
+  border-radius:0 3px 3px 0;
+}
+.toc a::before{
+  content:counter(toc);
+  flex:none;
+  width:15px;
+  text-align:right;
+  color:#a9b1bd;
+  font-variant-numeric:tabular-nums;
+  font-weight:600;
+}
+.toc a:hover{color:var(--ink);background:#f2f4f8}
+.toc a.on{color:var(--accent);border-left-color:var(--accent);background:var(--accent-soft);font-weight:600}
+.toc a.on::before{color:var(--accent)}
+
+/* ---------- Contenu ---------- */
+.content{
+  flex:1 1 auto;
+  min-width:0;
+  max-width:812px;
+  padding:52px 0 0;
+}
+
+header.masthead{padding-bottom:4px;margin-bottom:44px}
+.eyebrow{
+  font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--accent);font-weight:700;margin:0 0 20px;
+  padding-left:14px;border-left:3px solid var(--accent);
+}
+h1{
+  font-size:44px;line-height:1.1;letter-spacing:-.028em;
+  color:var(--ink);font-weight:750;margin:0 0 14px;
+}
+.lede{font-size:19.5px;color:var(--muted);margin:0 0 34px;max-width:60ch;line-height:1.5}
+
+.panel{
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:22px 26px;
+  margin:0 0 18px;
+}
+.panel-title{
+  font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent);font-weight:700;margin:0 0 14px;
+}
+.panel ol,.panel ul{margin:0;padding-left:22px}
+.panel li{margin:6px 0}
+.panel li::marker{color:var(--line-strong)}
+
+/* Titres numérotés automatiquement */
+.content{counter-reset:section}
+h2{
+  counter-increment:section;
+  counter-reset:sub;
+  display:flex;align-items:baseline;gap:14px;
+  font-size:29px;line-height:1.2;letter-spacing:-.022em;
+  color:var(--ink);font-weight:720;
+  margin:76px 0 8px;padding-top:26px;
+  border-top:2px solid var(--ink);
+  scroll-margin-top:16px;
+}
+h2::before{
+  content:counter(section);
+  flex:none;
+  font-size:13px;font-weight:700;line-height:1;
+  color:var(--accent);background:var(--accent-soft);
+  border:1px solid var(--accent-line);border-radius:5px;
+  padding:6px 9px;
+  transform:translateY(-5px);
+  font-variant-numeric:tabular-nums;
+}
+h2 + .section-sub{margin:0 0 30px;color:var(--muted);font-size:16.5px;max-width:64ch}
+h3{
+  counter-increment:sub;
+  font-size:20.5px;color:var(--ink);font-weight:670;letter-spacing:-.012em;
+  margin:44px 0 14px;scroll-margin-top:16px;
+}
+h3::before{
+  content:counter(section) "." counter(sub);
+  color:var(--accent);font-weight:700;margin-right:10px;
+  font-variant-numeric:tabular-nums;
+}
+h4{font-size:16px;color:var(--ink);font-weight:670;margin:26px 0 8px}
+
+p{margin:0 0 16px}
+.content ul,.content ol{margin:0 0 16px;padding-left:24px}
+.content li{margin:7px 0}
+.content li::marker{color:var(--line-strong)}
+strong{color:var(--ink);font-weight:650}
+em.en{color:var(--muted);font-style:italic}
+a{color:var(--accent)}
+
+/* ---------- Encadrés ---------- */
+.box{
+  border-left:3px solid;
+  border-radius:0 6px 6px 0;
+  padding:17px 22px;
+  margin:26px 0;
+  font-size:16px;
+}
+.box p:last-child{margin-bottom:0}
+.box .lbl{
+  display:block;font-weight:700;font-size:12.5px;
+  letter-spacing:.07em;text-transform:uppercase;margin-bottom:7px;
+}
+.warn{background:var(--warn-bg);border-color:var(--warn-line)}
+.warn .lbl{color:var(--warn-ink)}
+.tip{background:var(--tip-bg);border-color:var(--tip-line)}
+.tip .lbl{color:var(--tip-ink)}
+.recall{background:var(--recall-bg);border-color:var(--recall-line)}
+.recall .lbl{color:var(--recall-ink)}
+.key{background:var(--key-bg);border-color:var(--key-line)}
+.key .lbl{color:var(--key-ink)}
+
+/* Encadré métaphore — élément signature */
+.meta{
+  background:var(--meta-bg);
+  border:1px solid var(--meta-line);
+  border-radius:6px;
+  padding:20px 24px;
+  margin:26px 0;
+}
+.meta .lbl{
+  display:block;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--meta-ink);font-weight:700;margin-bottom:10px;
+}
+.meta p{margin-bottom:11px}
+.meta p:last-child{margin-bottom:0}
+
+/* ---------- Schémas ---------- */
+figure.fig{
+  margin:30px 0;
+  padding:22px 20px 16px;
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:6px;
+}
+figure.fig svg{width:100%;height:auto;display:block}
+figure.fig figcaption{
+  margin-top:16px;padding-top:12px;
+  border-top:1px solid var(--line-soft);
+  font-size:13px;color:var(--muted);line-height:1.5;
+}
+figure.fig figcaption b{color:var(--ink);font-weight:650}
+
+svg .bx      {fill:#fff;stroke:var(--line-strong);stroke-width:1.5}
+svg .bx-a    {fill:#edf0f8;stroke:#33447e;stroke-width:1.5}
+svg .bx-w    {fill:#fffbeb;stroke:#d97706;stroke-width:1.5}
+svg .bx-g    {fill:#ecfdf5;stroke:#059669;stroke-width:1.5}
+svg .bx-p    {fill:#f6f4fd;stroke:#7c3aed;stroke-width:1.5}
+svg .bx-soft {fill:#f7f8fa;stroke:var(--line-strong);stroke-width:1.2}
+svg .bx-dash {fill:none;stroke:var(--line-strong);stroke-width:1.4;stroke-dasharray:5 4}
+
+svg .t-h  {font:700 11px "Inter",system-ui,sans-serif;fill:#6a7381;letter-spacing:.13em}
+svg .t-b  {font:650 15px "Inter",system-ui,sans-serif;fill:#151a21}
+svg .t-bs {font:650 13px "Inter",system-ui,sans-serif;fill:#151a21}
+svg .t-s  {font:400 12px "Inter",system-ui,sans-serif;fill:#6a7381}
+svg .t-m  {font:400 12px Menlo,Consolas,monospace;fill:#2b323b}
+svg .t-ms {font:400 11px Menlo,Consolas,monospace;fill:#6a7381}
+svg .t-a  {fill:#33447e}
+svg .t-gr {fill:#0f7a55}
+svg .t-wr {fill:#a35a06}
+svg .t-rd {fill:#b3261e}
+
+svg .ar    {stroke:#7c8593;stroke-width:1.6;fill:none;marker-end:url(#ah)}
+svg .ar-a  {stroke:#33447e;stroke-width:1.8;fill:none;marker-end:url(#aha)}
+svg .ar-g  {stroke:#0f7a55;stroke-width:1.8;fill:none;marker-end:url(#ahg)}
+svg .ar-w  {stroke:#b8791a;stroke-width:1.8;fill:none;marker-end:url(#ahw)}
+svg .ar-d  {stroke:#c2c8d1;stroke-width:1.4;fill:none;stroke-dasharray:4 4;marker-end:url(#ah)}
+
+/* ---------- Code ---------- */
+pre{
+  background:var(--code-bg);
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:18px 20px;
+  overflow-x:auto;
+  margin:20px 0;
+  font-size:14.5px;
+  line-height:1.62;
+}
+code,pre{font-family:"SFMono-Regular",Menlo,Consolas,"Liberation Mono",monospace}
+p code,li code,td code,th code,figcaption code{
+  background:var(--code-bg);
+  border:1px solid var(--line-soft);
+  border-radius:3px;
+  padding:1px 5px;
+  font-size:.87em;
+  color:#333c47;
+}
+.k{color:var(--kw)}
+.s{color:var(--str)}
+.c{color:var(--com);font-style:italic}
+.n{color:var(--num)}
+.t{color:var(--typ)}
+.f{color:var(--fn)}
+.code-cap{
+  font-size:13px;color:var(--muted);margin:-12px 0 20px;padding-left:3px;
+}
+
+/* ---------- Tableaux ---------- */
+.tw{overflow-x:auto;margin:22px 0;border:1px solid var(--line);border-radius:6px}
+table{border-collapse:collapse;width:100%;font-size:15px;background:var(--paper)}
+th,td{border:1px solid var(--line);padding:10px 13px;text-align:left;vertical-align:top}
+tr>*:first-child{border-left:0}
+tr>*:last-child{border-right:0}
+thead tr:first-child>*{border-top:0}
+tbody tr:last-child>*{border-bottom:0}
+th{background:#f3f5f8;color:var(--ink);font-weight:670;font-size:13.5px}
+tbody th{background:#f8f9fb;font-weight:650}
+tbody tr:nth-child(even){background:#fafbfc}
+
+hr{border:0;border-top:1px solid var(--line);margin:60px 0}
+
+footer.end{
+  margin-top:80px;padding-top:22px;
+  border-top:2px solid var(--ink);
+  font-size:14px;color:var(--muted);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width:980px){
+  body{font-size:16px}
+  .layout{flex-direction:column;gap:0;padding:0 18px 72px}
+  .toc{
+    position:static;width:100%;flex:none;max-height:none;
+    padding:16px 0 0;border-bottom:1px solid var(--line);margin-bottom:6px;
+  }
+  .toc summary{
+    display:block;cursor:pointer;list-style:none;
+    font-size:11px;letter-spacing:.15em;text-transform:uppercase;
+    font-weight:700;color:var(--accent);padding:10px 0;
+  }
+  .toc summary::-webkit-details-marker{display:none}
+  .toc summary::after{content:" ▾";color:var(--muted)}
+  .toc[open] summary::after{content:" ▴"}
+  .toc-title{display:none}
+  .content{padding-top:26px;max-width:100%}
+  h1{font-size:32px}
+  h2{font-size:23.5px;margin-top:56px;padding-top:22px;gap:11px}
+  h2::before{font-size:12px;padding:5px 8px}
+  h3{font-size:18.5px}
+  .lede{font-size:17.5px}
+  pre{font-size:12.6px;padding:15px 16px}
+  figure.fig{padding:16px 13px 12px}
+  .box,.meta{padding:15px 17px}
+}
+
+@media print{
+  .toc,.progress{display:none}
+  .layout{display:block;max-width:100%}
+  body{background:#fff;font-size:11pt}
+  h2{page-break-after:avoid}
+  pre,table,.box,.meta,figure.fig{page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="progress" id="prog"></div>
+<svg class="svg-defs" aria-hidden="true" focusable="false"><defs>
+  <marker id="ah"  viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7c8593"/></marker>
+  <marker id="aha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#33447e"/></marker>
+  <marker id="ahg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0f7a55"/></marker>
+  <marker id="ahw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#b8791a"/></marker>
+</defs></svg>
+<div class="layout">
+
+<details class="toc" open>
+<summary>Sommaire</summary>
+<p class="toc-title">Sommaire</p>
+<nav>
+<ol>
+  <li><a href="#s1">Pourquoi cette séance</a></li>
+  <li><a href="#s2">Bibliothèque ou framework&nbsp;?</a></li>
+  <li><a href="#s3">Les principes qui justifient toute architecture</a></li>
+  <li><a href="#s4">L'architecture en couches</a></li>
+  <li><a href="#s5">MVC, MVP, MVVM</a></li>
+  <li><a href="#s6">Les architectures d'ensemble</a></li>
+  <li><a href="#s7">Deux ponts vers Spring Boot</a></li>
+  <li><a href="#s8">Les API</a></li>
+  <li><a href="#s9">Où se place Spring Boot</a></li>
+  <li><a href="#s10">Ce qu'il faut retenir</a></li>
+  <li><a href="#s11">Réflexes et pièges</a></li>
+</ol>
+</nav>
+</details>
+
+<main class="content">
+
+<header class="masthead">
+  <p class="eyebrow">Formation Bac → Bac+3 · Développement d'applications — Séance passerelle</p>
+  <h1>Frameworks &amp; architectures logicielles</h1>
+  <p class="lede">Comprendre ce qu'on vous demandera d'écrire, avant d'ouvrir Spring Boot.</p>
+
+  <div class="panel">
+    <p class="panel-title">Au programme aujourd'hui</p>
+    <ol>
+      <li>Ce qu'est un framework, et en quoi il diffère d'une bibliothèque</li>
+      <li>L'inversion de contrôle : le principe qui change tout</li>
+      <li>Les principes de conception qui justifient une architecture</li>
+      <li>L'architecture en couches : présentation, métier, persistance</li>
+      <li>Les patrons de présentation : MVC, MVP, MVVM</li>
+      <li>Les architectures d'ensemble : monolithe, microservices, hexagonale</li>
+      <li>Deux ponts vers Spring Boot : injection de dépendances et ORM</li>
+      <li>Les API, les API REST, et le trajet complet d'une donnée</li>
+    </ol>
+  </div>
+
+  <div class="panel">
+    <p class="panel-title">Prérequis</p>
+    <ul>
+      <li><strong>Modélisation</strong> — MCD, MLD, MPD : entités, associations, cardinalités, clés étrangères</li>
+      <li><strong>SQL / PostgreSQL</strong> — <code>CREATE TABLE</code>, <code>SELECT</code>, <code>JOIN</code>, contraintes</li>
+      <li><strong>POO Java</strong> — classes, objets, attributs, méthodes, constructeurs, interfaces, héritage</li>
+    </ul>
+    <p style="margin:12px 0 0;font-size:15px;color:var(--muted)">Aucune ligne de Spring n'est exigée aujourd'hui. On construit le vocabulaire.</p>
+  </div>
+</header>
+
+<section id="s1">
+<h2>Pourquoi cette séance</h2>
+<p class="section-sub">Le chaînon manquant entre ce que vous savez déjà et ce qui vous attend.</p>
+
+<p>Vous savez aujourd'hui faire trois choses, et vous les faites séparément. Vous savez modéliser un domaine et le traduire en tables PostgreSQL. Vous savez interroger ces tables en SQL. Vous savez écrire des classes Java qui manipulent des objets.</p>
+
+<p>Ce que personne ne vous a encore expliqué, c'est <strong>comment on assemble ces trois compétences dans une seule application</strong>, et pourquoi tout le monde les assemble à peu près de la même manière. Cette manière porte un nom : une <strong>architecture</strong>. Et l'outil qui vous impose — ou vous propose — cette architecture porte un nom : un <strong>framework</strong>.</p>
+
+<div class="box key">
+<span class="lbl">🎯 L'objectif du jour</span>
+<p>À la fin de cette séance, vous devez pouvoir lire une offre d'emploi qui dit « architecture n-tiers, Spring MVC, couche service, repository JPA, API REST » et comprendre chaque mot. Pas savoir les écrire — les <em>comprendre</em>.</p>
+</div>
+</section>
+
+<section id="s2">
+<h2>Bibliothèque ou framework&nbsp;?</h2>
+<p class="section-sub">La différence n'est pas une question de taille. C'est une question de qui commande.</p>
+
+<h3>La boîte à outils et la maison préfabriquée</h3>
+
+<div class="meta">
+<span class="lbl">🪄 Métaphore du chantier</span>
+<p>Vous devez construire une maison.</p>
+<p><strong>Première option : la boîte à outils.</strong> On vous livre un marteau, une scie, une perceuse. Excellents outils. Mais vous décidez de tout : où poser les fondations, quand monter les murs, dans quel ordre. Vous prenez le marteau quand <em>vous</em> en avez besoin, et vous le reposez. Vous êtes le chef de chantier.</p>
+<p><strong>Seconde option : la maison préfabriquée.</strong> On vous livre une structure déjà debout : murs porteurs, dalle, gaines électriques, arrivées d'eau. Vous n'avez plus qu'à aménager l'intérieur, aux emplacements prévus. Vous gagnez six mois. Mais vous ne mettez pas la salle de bain où vous voulez : les arrivées d'eau sont déjà là.</p>
+<p>La boîte à outils, c'est une <strong>bibliothèque</strong>. La maison préfabriquée, c'est un <strong>framework</strong>.</p>
+</div>
+
+<figure class="fig">
+<svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Comparaison du sens de l'appel entre une bibliothèque et un framework">
+  <text x="20" y="22" class="t-h">BIBLIOTHÈQUE</text>
+  <rect x="20" y="52" width="145" height="58" rx="5" class="bx"/>
+  <text x="92" y="80" class="t-bs" text-anchor="middle">Votre code</text>
+  <text x="92" y="98" class="t-s" text-anchor="middle">main()</text>
+  <rect x="212" y="52" width="128" height="58" rx="5" class="bx-p"/>
+  <text x="276" y="86" class="t-bs" text-anchor="middle">Gson, JUnit…</text>
+  <path d="M167,81 L208,81" class="ar-a"/>
+  <text x="187" y="70" class="t-ms t-a" text-anchor="middle">appelle</text>
+  <text x="20" y="142" class="t-s">Vous décidez du déroulement.</text>
+  <text x="20" y="162" class="t-s">Vous écrivez le point d'entrée.</text>
+
+  <line x1="360" y1="8" x2="360" y2="185" stroke="#dfe4ea" stroke-width="1"/>
+
+  <text x="382" y="22" class="t-h">FRAMEWORK</text>
+  <rect x="382" y="52" width="145" height="58" rx="5" class="bx-a"/>
+  <text x="454" y="80" class="t-bs" text-anchor="middle">Spring Boot</text>
+  <text x="454" y="98" class="t-s" text-anchor="middle">main()</text>
+  <rect x="574" y="52" width="128" height="58" rx="5" class="bx"/>
+  <text x="638" y="86" class="t-bs" text-anchor="middle">Votre code</text>
+  <path d="M529,81 L570,81" class="ar-a"/>
+  <text x="549" y="70" class="t-ms t-a" text-anchor="middle">appelle</text>
+  <text x="382" y="142" class="t-s">Il décide du déroulement.</text>
+  <text x="382" y="162" class="t-s">Le point d'entrée est déjà écrit.</text>
+</svg>
+<figcaption><b>Le seul critère qui tranche.</b> À gauche la flèche part de votre code, à droite elle y arrive. Tout le reste — la taille, l'âge, la popularité — ne dit rien sur la nature de l'outil.</figcaption>
+</figure>
+
+
+<p><strong>Une bibliothèque</strong> <em class="en">(library)</em> est un ensemble de classes et de fonctions déjà écrites, que <strong>vous appelez</strong> quand vous en avez besoin. Vous gardez la main sur le déroulement du programme.</p>
+
+<p><strong>Un framework</strong> — le mot se traduit par « cadre de travail », « ossature » — est un squelette d'application déjà construit, qui <strong>appelle votre code</strong> aux moments qu'il a prévus. C'est lui qui garde la main sur le déroulement du programme.</p>
+
+<h4>Le même travail, vu des deux côtés</h4>
+
+<pre><span class="c">// ── BIBLIOTHÈQUE : c'est MOI qui appelle ────────────────────</span>
+<span class="k">public class</span> <span class="t">Programme</span> {
+    <span class="k">public static void</span> <span class="f">main</span>(<span class="t">String</span>[] args) {
+        <span class="t">Client</span> client = <span class="k">new</span> <span class="t">Client</span>(<span class="s">"Dupont"</span>);   <span class="c">// mon code</span>
+        <span class="t">String</span> json = <span class="k">new</span> <span class="t">Gson</span>().<span class="f">toJson</span>(client);   <span class="c">// j'appelle la biblio</span>
+        <span class="t">System</span>.out.<span class="f">println</span>(json);                    <span class="c">// je reprends la main</span>
+    }
+}</pre>
+<p class="code-cap">Gson est une bibliothèque de conversion en JSON. Je l'appelle, elle répond, je continue.</p>
+
+<pre><span class="c">// ── FRAMEWORK : c'est LUI qui m'appelle ─────────────────────</span>
+<span class="k">@RestController</span>
+<span class="k">public class</span> <span class="t">ClientController</span> {
+
+    <span class="k">@GetMapping</span>(<span class="s">"/clients"</span>)              <span class="c">// « appelle-moi sur cette URL »</span>
+    <span class="k">public</span> <span class="t">List</span>&lt;<span class="t">Client</span>&gt; <span class="f">lister</span>() {       <span class="c">// je n'appelle JAMAIS cette méthode</span>
+        <span class="k">return</span> service.<span class="f">tousLesClients</span>();
+    }
+}</pre>
+<p class="code-cap">Extrait Spring, donné ici uniquement pour l'illustration. On y reviendra.</p>
+
+<p><strong>Analysons ce second bloc ligne par ligne :</strong></p>
+
+<div class="tw">
+<table>
+<thead><tr><th>Ligne</th><th>Ce qu'elle fait réellement</th></tr></thead>
+<tbody>
+<tr><td><code>@RestController</code></td><td>Une <strong>annotation</strong> : une étiquette collée sur la classe. Elle ne fait rien toute seule. Elle dit au framework : « cette classe contient des points d'entrée web, viens la chercher au démarrage ».</td></tr>
+<tr><td><code>@GetMapping("/clients")</code></td><td>Une seconde étiquette : « quand une requête HTTP GET arrive sur l'adresse <code>/clients</code>, c'est cette méthode qu'il faut exécuter ».</td></tr>
+<tr><td><code>public List&lt;Client&gt; lister()</code></td><td>Ma méthode. Nulle part dans mon projet je n'écris <code>lister()</code> pour l'exécuter. C'est le framework qui le fera, quand un navigateur se connectera.</td></tr>
+<tr><td><code>return service...</code></td><td>Je renvoie une liste d'objets Java. Le framework se chargera seul de la transformer en JSON et de l'envoyer sur le réseau.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="tw">
+<table>
+<thead><tr><th>&nbsp;</th><th>Bibliothèque</th><th>Framework</th></tr></thead>
+<tbody>
+<tr><th>Qui appelle qui</th><td>Votre code appelle la bibliothèque</td><td>Le framework appelle votre code</td></tr>
+<tr><th>Qui écrit le <code>main</code></th><td>Vous</td><td>Le framework (vous ne faites que le démarrer)</td></tr>
+<tr><th>Structure du projet</th><td>Libre</td><td>Imposée, ou fortement conseillée</td></tr>
+<tr><th>On l'enlève ?</th><td>Facile : quelques appels à réécrire</td><td>Difficile : c'est la structure porteuse</td></tr>
+<tr><th>Exemples Java</th><td>Gson, Apache Commons, JUnit</td><td>Spring Boot, Jakarta EE, Quarkus</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box warn">
+<span class="lbl">⚠️ Le piège du vocabulaire</span>
+<p>« Framework » n'est pas un synonyme de « grosse bibliothèque ». Un framework peut être petit, une bibliothèque peut être énorme. Le seul critère qui tranche est celui du <strong>sens de l'appel</strong> : si c'est vous qui appelez, c'est une bibliothèque ; si c'est lui qui vous appelle, c'est un framework.</p>
+</div>
+
+<h3>L'inversion de contrôle</h3>
+
+<div class="meta">
+<span class="lbl">🪄 Le chantier, suite</span>
+<p>Sur un chantier ordinaire, le plombier arrive quand il veut, pose ses tuyaux, s'en va. Résultat : il passe avant le maçon, le maçon casse ses tuyaux, tout est à refaire.</p>
+<p>Sur un chantier organisé, il y a un <strong>chef de chantier</strong>. Le plombier lui laisse son numéro et rentre chez lui. Le chef l'appelle le jour où c'est son tour. Le plombier a perdu la liberté de décider <em>quand</em> il travaille. Il a gagné une maison qui tient debout.</p>
+</div>
+
+<p>Ce renversement porte un nom : l'<strong>inversion de contrôle</strong> <em class="en">(Inversion of Control, IoC)</em>. Dans un programme classique, votre code décide de l'enchaînement et appelle les outils. Avec un framework, l'enchaînement appartient au framework, et c'est lui qui vient chercher vos morceaux de code.</p>
+
+<p>On résume souvent ce principe par une formule empruntée aux castings de cinéma, le <strong>principe d'Hollywood</strong> : <em>« Ne nous appelez pas, nous vous appellerons. »</em> Vous laissez vos coordonnées — vos annotations — et vous attendez.</p>
+
+<div class="tw">
+<table>
+<thead><tr><th>Programme classique</th><th>Programme piloté par un framework</th></tr></thead>
+<tbody>
+<tr><td>Vous écrivez la boucle principale</td><td>La boucle principale est fournie</td></tr>
+<tr><td>Vous décidez de l'ordre des opérations</td><td>Vous remplissez des emplacements prévus</td></tr>
+<tr><td>Vous savez toujours d'où vient un appel</td><td>Un appel peut « venir de nulle part »</td></tr>
+<tr><td>Vous écrivez beaucoup de plomberie</td><td>La plomberie existe déjà</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box warn">
+<span class="lbl">⚠️ IoC et injection de dépendances ne sont pas synonymes</span>
+<p>L'<strong>inversion de contrôle</strong> est un <em>principe</em> général : le contrôle du flux passe à un cadre extérieur. L'<strong>injection de dépendances</strong> <em class="en">(Dependency Injection, DI)</em> n'en est qu'une <em>technique</em> de mise en œuvre parmi d'autres. Tout DI est de l'IoC ; tout IoC n'est pas du DI. Confondre les deux est l'erreur la plus fréquente en entretien d'embauche.</p>
+</div>
+
+<h3>Ce qu'un framework vous donne, ce qu'il vous prend</h3>
+
+<p>Un framework n'est pas gratuit. Le choisir est un arbitrage, pas un réflexe.</p>
+
+<div class="tw">
+<table>
+<thead><tr><th>Ce qu'il vous donne</th><th>Ce qu'il vous prend</th></tr></thead>
+<tbody>
+<tr><td><strong>Du temps.</strong> La connexion à la base, la sécurité, la gestion des erreurs, le serveur web : tout est déjà écrit.</td><td><strong>Du temps, d'abord.</strong> Apprendre Spring prend des semaines. Sur un script de 200 lignes, vous perdez au change.</td></tr>
+<tr><td><strong>Des conventions.</strong> Un développeur qui arrive sur votre projet retrouve ses repères en une heure.</td><td><strong>De la liberté.</strong> On fait les choses à la manière du framework, ou on souffre.</td></tr>
+<tr><td><strong>Du code éprouvé.</strong> Des milliers de projets ont déjà trouvé les bugs à votre place.</td><td><strong>De la transparence.</strong> Beaucoup de choses se passent « toutes seules ». Quand ça casse, il faut savoir pourquoi.</td></tr>
+<tr><td><strong>Un écosystème.</strong> Documentation, forums, modules, recrutement.</td><td><strong>De l'indépendance.</strong> C'est l'<em>enfermement propriétaire</em> <em class="en">(vendor lock-in)</em> : en sortir coûte cher.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box tip">
+<span class="lbl">💡 La règle de décision</span>
+<p>Un framework est rentable quand le projet est <strong>durable</strong>, <strong>collectif</strong> et <strong>standard</strong>. Une application de gestion sur trois ans, à cinq développeurs : oui. Un script d'import lancé une fois : non, une bibliothèque suffit.</p>
+</div>
+
+<div class="box key">
+<span class="lbl">🎯 À retenir de cette section</span>
+<p>Bibliothèque : <strong>vous</strong> appelez. Framework : <strong>il</strong> vous appelle. Ce renversement s'appelle l'inversion de contrôle, et c'est la raison pour laquelle un framework peut vous imposer une architecture.</p>
+</div>
+</section>
+
+<section id="s3">
+<h2>Les principes qui justifient toute architecture</h2>
+<p class="section-sub">Une architecture n'est pas un goût personnel. C'est la réponse à quatre ou cinq principes.</p>
+
+<h3>La séparation des responsabilités</h3>
+
+<div class="meta">
+<span class="lbl">🪄 Métaphore du restaurant — on la garde jusqu'à la fin</span>
+<p>Dans un restaurant qui tourne, personne ne fait tout. Le serveur prend les commandes et apporte les assiettes ; il ne cuisine pas. Le cuisinier prépare ; il ne va jamais en salle. Le magasinier gère le stock ; il ne touche ni aux clients ni aux casseroles.</p>
+<p>Imaginez maintenant l'inverse : un seul employé qui prend la commande, court en cuisine, redescend en réserve, remonte, ressert. Aux heures creuses, ça marche. À midi, tout s'effondre. Et le jour où il tombe malade, le restaurant ferme.</p>
+</div>
+
+<p>La <strong>séparation des responsabilités</strong> <em class="en">(separation of concerns)</em> consiste à découper un programme en parties qui ont chacune <strong>un seul métier</strong>. Une partie affiche. Une partie décide. Une partie stocke. Aucune ne fait le travail d'une autre.</p>
+
+<p>Voici ce que donne le non-respect de ce principe. Ce code fonctionne, et c'est bien le problème :</p>
+
+<pre><span class="c">// ❌ Une seule méthode qui fait TOUT : afficher, décider, stocker</span>
+<span class="k">public void</span> <span class="f">inscrire</span>(<span class="t">String</span> nom, <span class="k">int</span> age) {
+    <span class="k">if</span> (age &lt; <span class="n">18</span>) {                                  <span class="c">// règle métier</span>
+        <span class="t">System</span>.out.<span class="f">println</span>(<span class="s">"Refusé : mineur"</span>);      <span class="c">// affichage</span>
+        <span class="k">return</span>;
+    }
+    <span class="t">Connection</span> c = <span class="t">DriverManager</span>.<span class="f">getConnection</span>(...); <span class="c">// accès base</span>
+    c.<span class="f">prepareStatement</span>(<span class="s">"INSERT INTO client ..."</span>).<span class="f">execute</span>();
+    <span class="t">System</span>.out.<span class="f">println</span>(<span class="s">"Bienvenue "</span> + nom);          <span class="c">// affichage</span>
+}</pre>
+
+<p><strong>Analysons ce code ligne par ligne :</strong></p>
+<ul>
+  <li><code>if (age &lt; 18)</code> — une <strong>règle métier</strong>. Elle appartient au domaine, pas à l'écran.</li>
+  <li><code>System.out.println</code> — de l'<strong>affichage</strong>, en console. Le jour où l'application devient un site web, cette ligne ne sert plus à rien.</li>
+  <li><code>DriverManager.getConnection</code> — de l'<strong>accès aux données</strong>, écrit en dur. Changer de base de données oblige à rouvrir cette méthode.</li>
+</ul>
+<p>Trois métiers dans huit lignes. Conséquence concrète : cette règle des 18 ans est <strong>intestable</strong> sans base de données allumée, et <strong>irréutilisable</strong> ailleurs.</p>
+
+<h3>Couplage et cohésion</h3>
+
+<div class="meta">
+<span class="lbl">🪄 La guirlande et le tiroir</span>
+<p><strong>Le couplage</strong>, c'est la vieille guirlande de Noël montée en série : une ampoule grille, tout s'éteint, et vous passez la soirée à chercher laquelle. Les guirlandes modernes sont en parallèle : une ampoule grille, les autres continuent.</p>
+<p><strong>La cohésion</strong>, c'est le tiroir à couverts : fourchettes avec fourchettes, couteaux avec couteaux. Son contraire est le tiroir fourre-tout de la cuisine, où cohabitent des piles, du scotch, une clé sans serrure et trois vis.</p>
+</div>
+
+<p>Le <strong>couplage</strong> mesure à quel point deux parties du code dépendent l'une de l'autre. La <strong>cohésion</strong> mesure à quel point les éléments d'une même partie vont réellement ensemble.</p>
+
+<div class="box key">
+<span class="lbl">🎯 La formule à retenir</span>
+<p><strong>Couplage faible, cohésion forte.</strong> Chaque module s'occupe d'une seule chose (cohésion forte) et dépend le moins possible des autres (couplage faible). Toute l'architecture logicielle tient dans ces quatre mots.</p>
+</div>
+
+<h3>DRY, KISS, YAGNI</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th>Sigle</th><th>Ce qu'il dit</th><th>🪄 L'image</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>DRY</strong><br><em class="en">Don't Repeat Yourself</em></td>
+  <td>Ne vous répétez pas. Chaque règle est écrite à un seul endroit.</td>
+  <td>La recette est notée une fois dans le carnet, pas recopiée sur douze bouts de papier — sinon, le jour où vous changez la dose de sel, vous en oubliez huit.</td>
+</tr>
+<tr>
+  <td><strong>KISS</strong><br><em class="en">Keep It Simple, Stupid</em></td>
+  <td>Faites simple. La solution la plus courte qui marche est presque toujours la bonne.</td>
+  <td>Pour ouvrir une boîte de conserve, un ouvre-boîte. Pas une machine à quinze engrenages qui fait aussi le café.</td>
+</tr>
+<tr>
+  <td><strong>YAGNI</strong><br><em class="en">You Aren't Gonna Need It</em></td>
+  <td>Vous n'en aurez pas besoin. N'écrivez pas aujourd'hui ce qui « servira peut-être un jour ».</td>
+  <td>Emporter une tente et un réchaud pour aller au bureau, au cas où.</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box warn">
+<span class="lbl">⚠️ DRY mal compris fait plus de mal que bien</span>
+<p>Deux morceaux de code qui <em>se ressemblent</em> ne sont pas forcément des doublons. DRY parle de <strong>connaissance</strong> dupliquée, pas de caractères dupliqués. Le calcul d'une TVA et le calcul d'une remise peuvent s'écrire pareil : les factoriser en une seule méthode vous garantit une catastrophe le jour où la TVA change.</p>
+</div>
+
+<h3>SOLID en cinq phrases</h3>
+
+<p>SOLID est un moyen mnémotechnique pour cinq principes de conception orientée objet. Deux d'entre eux vous serviront dès la semaine prochaine ; retenez surtout ceux-là.</p>
+
+<div class="tw">
+<table>
+<thead><tr><th>Lettre</th><th>Principe</th><th>En une phrase</th></tr></thead>
+<tbody>
+<tr><td><strong>S</strong></td><td>Responsabilité unique<br><em class="en">Single Responsibility</em></td><td>Une classe ne doit avoir qu'<strong>une seule raison de changer</strong>.</td></tr>
+<tr><td><strong>O</strong></td><td>Ouvert / fermé<br><em class="en">Open/Closed</em></td><td>On doit pouvoir ajouter un comportement sans rouvrir le code existant.</td></tr>
+<tr><td><strong>L</strong></td><td>Substitution de Liskov</td><td>Une classe fille doit pouvoir remplacer sa classe mère sans rien casser.</td></tr>
+<tr><td><strong>I</strong></td><td>Ségrégation des interfaces</td><td>Mieux vaut plusieurs petites interfaces qu'une grosse fourre-tout.</td></tr>
+<tr><td><strong>D</strong></td><td>Inversion des dépendances<br><em class="en">Dependency Inversion</em></td><td>On dépend d'<strong>interfaces</strong>, jamais de classes concrètes.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h4>Le « D », en détail — c'est lui qui prépare Spring</h4>
+
+<div class="meta">
+<span class="lbl">🪄 La prise électrique</span>
+<p>Votre lampe de bureau ne connaît pas la centrale nucléaire. Elle ne connaît qu'une chose : une prise à deux trous, 230 volts. C'est un <strong>contrat standard</strong>. Derrière la prise, on peut passer du nucléaire à l'éolien sans que la lampe s'en aperçoive — et vous pouvez brancher n'importe quelle lampe.</p>
+<p>La prise, c'est l'<strong>interface</strong>. La lampe ne dépend pas d'un producteur d'électricité, elle dépend d'une prise.</p>
+</div>
+
+<pre><span class="c">// ❌ COUPLAGE FORT — le service fabrique lui-même sa dépendance</span>
+<span class="k">public class</span> <span class="t">ServiceClient</span> {
+    <span class="k">private</span> <span class="t">ClientDaoPostgres</span> dao = <span class="k">new</span> <span class="t">ClientDaoPostgres</span>();
+    <span class="c">//      ↑ soudé à PostgreSQL, pour toujours</span>
+}
+
+<span class="c">// ✅ INVERSION DES DÉPENDANCES — on dépend d'un contrat</span>
+<span class="k">public interface</span> <span class="t">ClientDao</span> {              <span class="c">// la « prise »</span>
+    <span class="t">Client</span> <span class="f">trouverParId</span>(<span class="t">Long</span> id);
+}
+
+<span class="k">public class</span> <span class="t">ServiceClient</span> {
+    <span class="k">private final</span> <span class="t">ClientDao</span> dao;           <span class="c">// une interface, pas une classe</span>
+
+    <span class="k">public</span> <span class="f">ServiceClient</span>(<span class="t">ClientDao</span> dao) {   <span class="c">// on ME donne l'implémentation</span>
+        <span class="k">this</span>.dao = dao;
+    }
+}</pre>
+
+<p><strong>Analysons ce code ligne par ligne :</strong></p>
+<ol>
+  <li><code>new ClientDaoPostgres()</code> — la classe fabrique elle-même son outil. Elle est <strong>soudée</strong> à PostgreSQL : impossible de la tester sans base réelle, impossible de changer de stockage.</li>
+  <li><code>interface ClientDao</code> — on déclare le <strong>contrat</strong> : « quelqu'un, quelque part, sait retrouver un client par son identifiant ». On ne dit pas comment.</li>
+  <li><code>private final ClientDao dao</code> — le service ne connaît plus que le contrat. <code>final</code> garantit que la dépendance ne changera pas en cours de route.</li>
+  <li><code>public ServiceClient(ClientDao dao)</code> — la dépendance <strong>entre par le constructeur</strong>. Le service ne la fabrique plus : on la lui fournit. C'est exactement ce que Spring automatisera.</li>
+</ol>
+
+<div class="box tip">
+<span class="lbl">💡 Le test qui ne ment pas</span>
+<p>Posez-vous cette question devant n'importe quelle classe : <strong>« puis-je la tester sans allumer la base de données ? »</strong> Si la réponse est non, le couplage est trop fort. Avec la seconde version, il suffit de passer une fausse implémentation de <code>ClientDao</code> qui renvoie un client inventé.</p>
+</div>
+</section>
+
+<section id="s4">
+<h2>L'architecture en couches</h2>
+<p class="section-sub">Le découpage que vous retrouverez dans neuf applications de gestion sur dix.</p>
+
+<h3>Les trois étages du restaurant</h3>
+
+<div class="meta">
+<span class="lbl">🪄 Le restaurant, suite</span>
+<p>Trois espaces, trois métiers, et une circulation stricte :</p>
+<p><strong>La salle</strong> — le serveur accueille, prend la commande, apporte l'assiette. Il ne décide pas de la recette et ne descend jamais en réserve.</p>
+<p><strong>La cuisine</strong> — on applique les recettes, on refuse un plat si un ingrédient manque, on décide qu'un plat n'est pas servi le dimanche. C'est là que sont les <em>règles</em>.</p>
+<p><strong>La réserve</strong> — on range, on retrouve, on sort les ingrédients. Aucune décision : on stocke et on rend ce qu'on demande.</p>
+<p>Et surtout : <strong>le client ne va jamais en réserve.</strong> Il parle au serveur, qui parle à la cuisine, qui parle à la réserve. Chacun ne s'adresse qu'à son voisin immédiat.</p>
+</div>
+
+<p>L'<strong>architecture en couches</strong> <em class="en">(layered architecture)</em> reprend exactement ce découpage :</p>
+
+<div class="tw">
+<table>
+<thead><tr><th>Couche</th><th>Rôle</th><th>🪄 Au restaurant</th><th>Ce qu'elle ne fait JAMAIS</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>Présentation</strong></td>
+  <td>Recevoir la demande de l'utilisateur, afficher le résultat</td>
+  <td>La salle</td>
+  <td>Aucun calcul métier, aucun SQL</td>
+</tr>
+<tr>
+  <td><strong>Métier</strong><br>(ou service)</td>
+  <td>Appliquer les règles, orchestrer, valider, gérer les transactions</td>
+  <td>La cuisine</td>
+  <td>Aucun affichage, aucun <code>System.out</code></td>
+</tr>
+<tr>
+  <td><strong>Persistance</strong><br>(ou accès aux données)</td>
+  <td>Lire et écrire dans la base</td>
+  <td>La réserve</td>
+  <td>Aucune règle métier</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<figure class="fig">
+<svg viewBox="0 0 720 432" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Les trois couches d'une application et la circulation entre elles">
+  <rect x="205" y="16" width="310" height="72" rx="6" class="bx-a"/>
+  <text x="360" y="47" class="t-b" text-anchor="middle">Présentation</text>
+  <text x="360" y="68" class="t-s" text-anchor="middle">reçoit la demande, renvoie la réponse</text>
+  <text x="192" y="45" class="t-ms" text-anchor="end">@Controller</text>
+  <text x="192" y="63" class="t-ms" text-anchor="end">DTO</text>
+  <path d="M519,52 L556,52" stroke="#dfe4ea" stroke-width="1.4" stroke-dasharray="4 3"/>
+  <text x="562" y="57" class="t-s">La salle</text>
+
+  <rect x="205" y="126" width="310" height="72" rx="6" class="bx-g"/>
+  <text x="360" y="157" class="t-b" text-anchor="middle">Métier</text>
+  <text x="360" y="178" class="t-s" text-anchor="middle">applique les règles, décide</text>
+  <text x="192" y="155" class="t-ms" text-anchor="end">@Service</text>
+  <text x="192" y="173" class="t-ms" text-anchor="end">règles du domaine</text>
+  <path d="M519,162 L556,162" stroke="#dfe4ea" stroke-width="1.4" stroke-dasharray="4 3"/>
+  <text x="562" y="167" class="t-s">La cuisine</text>
+
+  <rect x="205" y="236" width="310" height="72" rx="6" class="bx-p"/>
+  <text x="360" y="267" class="t-b" text-anchor="middle">Persistance</text>
+  <text x="360" y="288" class="t-s" text-anchor="middle">lit et écrit dans la base</text>
+  <text x="192" y="265" class="t-ms" text-anchor="end">@Repository</text>
+  <text x="192" y="283" class="t-ms" text-anchor="end">entités</text>
+  <path d="M519,272 L556,272" stroke="#dfe4ea" stroke-width="1.4" stroke-dasharray="4 3"/>
+  <text x="562" y="277" class="t-s">La réserve</text>
+
+  <path d="M300,88 L300,122" class="ar-w"/>
+  <path d="M420,124 L420,90" class="ar-g"/>
+  <text x="292" y="110" class="t-ms t-wr" text-anchor="end">demande</text>
+  <text x="428" y="110" class="t-ms t-gr">réponse</text>
+
+  <path d="M300,198 L300,232" class="ar-w"/>
+  <path d="M420,234 L420,200" class="ar-g"/>
+
+  <path d="M300,308 L300,342" class="ar-w"/>
+  <path d="M420,344 L420,310" class="ar-g"/>
+  <text x="292" y="330" class="t-ms t-wr" text-anchor="end">SQL</text>
+  <text x="428" y="330" class="t-ms t-gr">lignes</text>
+
+  <path d="M282,358 L282,394 A78,12 0 0,0 438,394 L438,358" class="bx"/>
+  <ellipse cx="360" cy="358" rx="78" ry="12" class="bx"/>
+  <text x="360" y="386" class="t-bs" text-anchor="middle">PostgreSQL</text>
+</svg>
+<figcaption><b>La règle de circulation.</b> Chaque couche ne s'adresse qu'à sa voisine du dessous, et la réponse remonte le même chemin. Aucune flèche ne saute une étape : un contrôleur qui parlerait directement à PostgreSQL casserait tout l'édifice.</figcaption>
+</figure>
+
+<div class="box key">
+<span class="lbl">🎯 La règle de circulation</span>
+<p>Chaque couche ne parle qu'à <strong>celle du dessous</strong>. La présentation appelle le métier, le métier appelle la persistance. Jamais l'inverse, et jamais de saut : un contrôleur qui écrit du SQL est une faute d'architecture, même si le code fonctionne.</p>
+</div>
+
+<h3>Le vocabulaire des couches</h3>
+
+<p>Ces cinq mots reviendront chaque jour à partir de la semaine prochaine. Ce sont des <strong>rôles</strong>, pas des mots-clés du langage : ce sont de simples classes Java.</p>
+
+<div class="tw">
+<table>
+<thead><tr><th>Terme</th><th>Définition</th><th>Couche</th><th>🪄 Au restaurant</th></tr></thead>
+<tbody>
+<tr><td><strong>Contrôleur</strong><br><em class="en">Controller</em></td><td>Reçoit la requête, appelle le service, renvoie une réponse</td><td>Présentation</td><td>Le serveur</td></tr>
+<tr><td><strong>Service</strong></td><td>Contient les règles métier et enchaîne les opérations</td><td>Métier</td><td>Le chef de cuisine</td></tr>
+<tr><td><strong>Repository</strong> / <strong>DAO</strong><br><em class="en">Data Access Object</em></td><td>Sait lire et écrire une table. Rien d'autre.</td><td>Persistance</td><td>Le magasinier</td></tr>
+<tr><td><strong>Entité</strong><br><em class="en">Entity</em></td><td>Une classe Java qui reflète une <strong>table</strong> de la base</td><td>Traverse tout</td><td>L'ingrédient tel qu'il est stocké</td></tr>
+<tr><td><strong>DTO</strong><br><em class="en">Data Transfer Object</em></td><td>Un objet fait pour <strong>sortir</strong> de l'application : uniquement les champs qu'on accepte de montrer</td><td>Présentation</td><td>L'assiette dressée qui part en salle</td></tr>
+</tbody>
+</table>
+</div>
+
+<pre><span class="c">// Le même besoin, traversant les trois couches</span>
+
+<span class="c">// ── PRÉSENTATION : je reçois, je délègue, je renvoie ─────────</span>
+<span class="k">public class</span> <span class="t">ClientController</span> {
+    <span class="k">private final</span> <span class="t">ClientService</span> service;
+
+    <span class="k">public</span> <span class="t">ClientDto</span> <span class="f">fiche</span>(<span class="t">Long</span> id) {
+        <span class="t">Client</span> client = service.<span class="f">trouverParId</span>(id);   <span class="c">// je délègue</span>
+        <span class="k">return</span> <span class="t">ClientDto</span>.<span class="f">depuis</span>(client);            <span class="c">// je masque les champs privés</span>
+    }
+}
+
+<span class="c">// ── MÉTIER : je décide ───────────────────────────────────────</span>
+<span class="k">public class</span> <span class="t">ClientService</span> {
+    <span class="k">private final</span> <span class="t">ClientRepository</span> repository;
+
+    <span class="k">public</span> <span class="t">Client</span> <span class="f">trouverParId</span>(<span class="t">Long</span> id) {
+        <span class="t">Client</span> c = repository.<span class="f">findById</span>(id);
+        <span class="k">if</span> (c == <span class="k">null</span>) <span class="k">throw new</span> <span class="t">ClientIntrouvable</span>(id); <span class="c">// règle métier</span>
+        <span class="k">return</span> c;
+    }
+}
+
+<span class="c">// ── PERSISTANCE : je range et je retrouve ────────────────────</span>
+<span class="k">public interface</span> <span class="t">ClientRepository</span> {
+    <span class="t">Client</span> <span class="f">findById</span>(<span class="t">Long</span> id);
+    <span class="k">void</span> <span class="f">save</span>(<span class="t">Client</span> client);
+}</pre>
+
+<p><strong>Analysons ce code ligne par ligne :</strong></p>
+<ol>
+  <li>Le <strong>contrôleur</strong> ne contient aucune décision. Il traduit une demande extérieure en appel de service, puis traduit le résultat en objet de sortie.</li>
+  <li>Le <strong>service</strong> décide : ici, « un client introuvable est une erreur ». C'est une règle du domaine, elle vit donc au milieu.</li>
+  <li>Le <strong>repository</strong> est une <em>interface</em> — un contrat. On applique le « D » de SOLID : le service dépend d'un contrat, pas d'une implémentation PostgreSQL.</li>
+  <li>Chaque couche ne connaît que la suivante. Le contrôleur ignore jusqu'à l'existence du repository.</li>
+</ol>
+
+<h3>Où atterrissent vos MCD, MLD et MPD</h3>
+
+<div class="box recall">
+<span class="lbl">📝 Rappel des séances de modélisation</span>
+<p>Vous avez descendu trois marches : le <strong>MCD</strong> décrit le monde réel (entités, associations, cardinalités) ; le <strong>MLD</strong> le traduit en tables et clés étrangères ; le <strong>MPD</strong> le concrétise dans un SGBD précis (types PostgreSQL, index, contraintes).</p>
+<p>Il vous manquait la quatrième marche : <strong>comment cette table redevient un objet Java</strong>.</p>
+</div>
+
+<pre><span class="c">-- MPD : la table telle qu'elle existe dans PostgreSQL</span>
+<span class="k">CREATE TABLE</span> client (
+    id                <span class="t">SERIAL</span> <span class="k">PRIMARY KEY</span>,
+    nom               <span class="t">VARCHAR</span>(<span class="n">50</span>)  <span class="k">NOT NULL</span>,
+    email             <span class="t">VARCHAR</span>(<span class="n">120</span>) <span class="k">UNIQUE</span>,
+    date_inscription  <span class="t">DATE</span>         <span class="k">NOT NULL</span>
+);</pre>
+
+<pre><span class="c">// La même réalité, vue depuis Java : une classe « entité »</span>
+<span class="k">public class</span> <span class="t">Client</span> {
+    <span class="k">private</span> <span class="t">Long</span> id;                  <span class="c">// ↔ colonne id</span>
+    <span class="k">private</span> <span class="t">String</span> nom;               <span class="c">// ↔ colonne nom</span>
+    <span class="k">private</span> <span class="t">String</span> email;             <span class="c">// ↔ colonne email</span>
+    <span class="k">private</span> <span class="t">LocalDate</span> dateInscription; <span class="c">// ↔ colonne date_inscription</span>
+    <span class="c">// + constructeur, getters, setters</span>
+}</pre>
+
+<div class="tw">
+<table>
+<thead><tr><th>Monde des bases de données</th><th>Monde Java</th><th>Correspondance</th></tr></thead>
+<tbody>
+<tr><td>Table <code>client</code></td><td>Classe <code>Client</code></td><td>Une table ↔ une classe</td></tr>
+<tr><td>Colonne <code>nom</code></td><td>Attribut <code>nom</code></td><td>Une colonne ↔ un attribut</td></tr>
+<tr><td>Ligne (enregistrement)</td><td>Instance (objet)</td><td>Une ligne ↔ un objet</td></tr>
+<tr><td>Clé primaire <code>id</code></td><td>Attribut <code>id</code></td><td>Identité de l'objet</td></tr>
+<tr><td>Clé étrangère <code>id_commande</code></td><td>Référence <code>Commande commande</code></td><td>Une jointure ↔ une référence d'objet</td></tr>
+<tr><td><code>date_inscription</code> (snake_case)</td><td><code>dateInscription</code> (camelCase)</td><td>Conventions de nommage différentes</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Écrire cette traduction à la main, table par table, colonne par colonne, est fastidieux et répétitif. C'est exactement le travail que fera l'<strong>ORM</strong> — on y revient en section 7.</p>
+
+<div class="box warn">
+<span class="lbl">⚠️ Une entité n'est pas un DTO</span>
+<p>L'<strong>entité</strong> est le reflet fidèle de la table : elle contient <em>tout</em>, y compris le mot de passe haché, la note interne du commercial, l'identifiant technique. Le <strong>DTO</strong> est ce qu'on accepte de montrer à l'extérieur.</p>
+<p>Renvoyer directement une entité dans une réponse web est la fuite de données la plus banale du métier. En réserve, il y a le carton entier ; en salle, on apporte une assiette.</p>
+</div>
+
+<div class="box tip">
+<span class="lbl">💡 Reconnaître une bonne couche métier</span>
+<p>Ouvrez une classe de service et cherchez les mots <code>SELECT</code>, <code>HttpServletRequest</code>, <code>System.out</code>. Si vous en trouvez, une couche déborde sur une autre. Une couche métier propre ne parle que le langage du domaine : clients, commandes, remises, factures.</p>
+</div>
+</section>
+
+<section id="s5">
+<h2>MVC, MVP, MVVM</h2>
+<p class="section-sub">Trois manières d'organiser l'écran. Ce ne sont pas des architectures rivales : ce sont trois façons de découper la couche de présentation.</p>
+
+<div class="box warn">
+<span class="lbl">⚠️ La confusion à dissiper tout de suite</span>
+<p>MVC n'est <strong>pas</strong> une alternative à l'architecture en couches. MVC organise la <em>couche présentation</em> ; les couches organisent l'<em>application entière</em>. Une application Spring normale est en trois couches <strong>et</strong> en MVC. Les deux cohabitent, ils ne se remplacent pas.</p>
+</div>
+
+<h3>MVC — Modèle, Vue, Contrôleur</h3>
+
+<div class="meta">
+<span class="lbl">🪄 Le service en salle</span>
+<p>Vous commandez. Le <strong>serveur</strong> note, porte le bon en cuisine, revient avec l'assiette et la pose sur la <strong>table</strong>. La <strong>cuisine</strong> a préparé le plat sans jamais vous voir. La table présente le plat sans rien savoir de la recette.</p>
+<p>Le serveur est le <strong>contrôleur</strong>, la cuisine est le <strong>modèle</strong>, la table est la <strong>vue</strong>.</p>
+</div>
+
+<div class="tw">
+<table>
+<thead><tr><th>Élément</th><th>Responsabilité</th><th>Ce qu'il ignore</th></tr></thead>
+<tbody>
+<tr><td><strong>Modèle</strong></td><td>Les données et les règles métier</td><td>Il ignore totalement l'existence d'un écran</td></tr>
+<tr><td><strong>Vue</strong></td><td>L'affichage. Elle lit le modèle et le met en forme</td><td>Elle ne contient aucun calcul, aucune décision</td></tr>
+<tr><td><strong>Contrôleur</strong></td><td>Recevoir l'action de l'utilisateur, appeler le modèle, choisir la vue</td><td>Il n'affiche rien et ne calcule rien</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Le trajet d'une requête, dans l'ordre :</p>
+<figure class="fig">
+<svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Le trajet d'une requête dans le patron MVC">
+  <rect x="20" y="118" width="132" height="64" rx="6" class="bx-soft"/>
+  <text x="86" y="156" class="t-bs" text-anchor="middle">Utilisateur</text>
+
+  <rect x="294" y="20" width="152" height="64" rx="6" class="bx-a"/>
+  <text x="370" y="49" class="t-b" text-anchor="middle">Contrôleur</text>
+  <text x="370" y="68" class="t-s" text-anchor="middle">il orchestre</text>
+
+  <rect x="568" y="118" width="134" height="64" rx="6" class="bx-p"/>
+  <text x="635" y="147" class="t-b" text-anchor="middle">Modèle</text>
+  <text x="635" y="166" class="t-s" text-anchor="middle">données + règles</text>
+
+  <rect x="294" y="216" width="152" height="64" rx="6" class="bx-g"/>
+  <text x="370" y="245" class="t-b" text-anchor="middle">Vue</text>
+  <text x="370" y="264" class="t-s" text-anchor="middle">elle affiche</text>
+
+  <path d="M86,118 L86,52 L290,52" class="ar-a"/>
+  <text x="180" y="42" class="t-ms t-a" text-anchor="middle">1 · requête</text>
+
+  <path d="M446,52 L635,52 L635,114" class="ar-a"/>
+  <text x="545" y="42" class="t-ms t-a" text-anchor="middle">2 · appelle le métier</text>
+
+  <path d="M568,148 L470,148 L470,88" class="ar"/>
+  <text x="516" y="140" class="t-ms" text-anchor="middle">3 · données</text>
+
+  <path d="M370,84 L370,212" class="ar-a"/>
+  <text x="380" y="152" class="t-ms t-a">4 · choisit la vue</text>
+
+  <path d="M294,248 L86,248 L86,186" class="ar-g"/>
+  <text x="190" y="266" class="t-ms t-gr" text-anchor="middle">5 · page affichée</text>
+</svg>
+<figcaption><b>Cinq étapes, toujours les mêmes.</b> Le contrôleur ne calcule rien (étape 2) et n'affiche rien (étape 4) : il ne fait que passer les plats. C'est ce qui permet de changer la vue sans toucher au modèle.</figcaption>
+</figure>
+
+<pre><span class="c">// LE CONTRÔLEUR — il n'affiche rien, il ne calcule rien</span>
+<span class="k">public class</span> <span class="t">ClientController</span> {
+
+    <span class="k">private final</span> <span class="t">ClientService</span> service;   <span class="c">// le lien vers la cuisine</span>
+
+    <span class="k">public</span> <span class="t">String</span> <span class="f">afficherFiche</span>(<span class="t">Long</span> id, <span class="t">Modele</span> modele) {
+        <span class="t">Client</span> client = service.<span class="f">trouverParId</span>(id); <span class="c">// 1. je passe la commande</span>
+        modele.<span class="f">ajouter</span>(<span class="s">"client"</span>, client);        <span class="c">// 2. je pose le plat sur le passe</span>
+        <span class="k">return</span> <span class="s">"fiche-client"</span>;                   <span class="c">// 3. je désigne la table</span>
+    }
+}</pre>
+
+<p><strong>Analysons ce code ligne par ligne :</strong></p>
+<ol>
+  <li><code>service.trouverParId(id)</code> — le contrôleur <strong>délègue</strong>. Il ne sait pas comment on trouve un client, il sait à qui demander.</li>
+  <li><code>modele.ajouter("client", client)</code> — il dépose le résultat dans un sac de données que la vue viendra ouvrir. C'est le passe-plat.</li>
+  <li><code>return "fiche-client"</code> — il renvoie un simple texte : le <strong>nom</strong> de la vue à utiliser. Il ne génère pas une ligne de HTML lui-même.</li>
+</ol>
+
+<div class="box warn">
+<span class="lbl">⚠️ Le « M » de MVC n'est pas la base de données</span>
+<p>Le modèle, ce sont les <strong>données et les règles</strong> du domaine, pas les tables PostgreSQL. Dans une application en couches, le « M » de MVC recouvre en pratique la couche métier <em>et</em> la couche persistance réunies, vues depuis la présentation.</p>
+</div>
+
+<h3>MVP — Modèle, Vue, Présentateur</h3>
+
+<div class="meta">
+<span class="lbl">🪄 Le serveur qui dresse à table</span>
+<p>Variante du service : le serveur ne se contente plus de poser l'assiette. Il apporte les éléments et <strong>dresse le plat devant vous</strong>, morceau par morceau. La table, elle, ne fait strictement rien : elle subit.</p>
+</div>
+
+<p>Dans MVP, la vue devient <strong>passive</strong>. Elle n'a plus le droit de lire le modèle. Le <strong>présentateur</strong> lui dicte tout, champ par champ : « écris <em>Dupont</em> dans le libellé du nom ».</p>
+
+<pre><span class="c">// La VUE est réduite à un contrat d'affichage pur</span>
+<span class="k">public interface</span> <span class="t">VueFicheClient</span> {
+    <span class="k">void</span> <span class="f">afficherNom</span>(<span class="t">String</span> nom);
+    <span class="k">void</span> <span class="f">afficherErreur</span>(<span class="t">String</span> message);
+}
+
+<span class="c">// LE PRÉSENTATEUR pilote la vue instruction par instruction</span>
+<span class="k">public class</span> <span class="t">PresentateurClient</span> {
+    <span class="k">private final</span> <span class="t">VueFicheClient</span> vue;      <span class="c">// il tient la vue</span>
+    <span class="k">private final</span> <span class="t">ClientService</span> service;
+
+    <span class="k">public void</span> <span class="f">charger</span>(<span class="t">Long</span> id) {
+        <span class="k">try</span> {
+            <span class="t">Client</span> c = service.<span class="f">trouverParId</span>(id);
+            vue.<span class="f">afficherNom</span>(c.<span class="f">getNom</span>());       <span class="c">// il DICTE l'affichage</span>
+        } <span class="k">catch</span> (<span class="t">ClientIntrouvable</span> e) {
+            vue.<span class="f">afficherErreur</span>(<span class="s">"Client inconnu"</span>);
+        }
+    }
+}</pre>
+
+<p>L'intérêt est le test : la vue étant une simple interface, on la remplace par une fausse implémentation et on vérifie que le présentateur a bien appelé <code>afficherErreur</code>. Aucun écran nécessaire.</p>
+
+<h3>MVVM et la liaison de données</h3>
+
+<div class="meta">
+<span class="lbl">🪄 Le passe-plat automatique</span>
+<p>Dernière évolution du restaurant : on installe un tapis roulant entre la cuisine et la table. Dès qu'un plat est prêt, il <strong>apparaît</strong> devant vous. Personne ne le porte. Et dans l'autre sens : dès que vous posez votre carte de fidélité sur la table, la cuisine le sait immédiatement.</p>
+<p>Plus personne ne fait le trajet. Le tapis est branché une fois pour toutes.</p>
+</div>
+
+<p>Ce tapis roulant s'appelle la <strong>liaison de données</strong> <em class="en">(data binding)</em>, et c'est la seule vraie différence entre MVVM et les deux précédents.</p>
+
+<p>Le <strong>ViewModel</strong> — « modèle de vue » — expose l'état de l'écran et les données mises en forme. Il ne connaît pas la vue et ne l'appelle jamais. La vue se <em>branche</em> dessus.</p>
+
+<pre><span class="c">&lt;!-- LA VUE : aucune logique, uniquement des branchements --&gt;</span>
+&lt;<span class="t">input</span> <span class="k">v-model</span>=<span class="s">"nom"</span>&gt;                  <span class="c">&lt;!-- liaison à double sens --&gt;</span>
+&lt;<span class="t">p</span>&gt;Bonjour {{ nomEnMajuscules }}&lt;/<span class="t">p</span>&gt;  <span class="c">&lt;!-- liaison en lecture --&gt;</span></pre>
+
+<pre><span class="c">// LE VIEWMODEL : l'état de l'écran, sans aucune référence à la vue</span>
+data() {
+  <span class="k">return</span> { nom: <span class="s">""</span> };                    <span class="c">// l'état</span>
+},
+computed: {
+  <span class="f">nomEnMajuscules</span>() {
+    <span class="k">return</span> <span class="k">this</span>.nom.<span class="f">toUpperCase</span>();       <span class="c">// recalculé tout seul</span>
+  }
+}</pre>
+
+<p><strong>Analysons ce code ligne par ligne :</strong></p>
+<ol>
+  <li><code>v-model="nom"</code> — la <strong>double liaison</strong> : l'utilisateur tape, l'attribut <code>nom</code> change instantanément ; on modifie <code>nom</code> par programme, le champ se met à jour. Aucun code pour ça.</li>
+  <li><code>{{ nomEnMajuscules }}</code> — la vue affiche une valeur calculée sans savoir comment elle est calculée.</li>
+  <li><code>nomEnMajuscules()</code> — cette fonction est <strong>rejouée automatiquement</strong> à chaque changement de <code>nom</code>. Personne ne l'appelle : le framework observe.</li>
+  <li>Nulle part le ViewModel ne dit <code>vue.afficher(...)</code>. Il ignore qu'une vue existe. C'est là toute la différence avec MVP.</li>
+</ol>
+
+<div class="box warn">
+<span class="lbl">⚠️ Le vrai critère de distinction</span>
+<p>On lit souvent « MVC pour le web, MVVM pour le desktop ». C'est faux et ça ne vous aidera pas. Le critère réel est unique : <strong>y a-t-il une liaison de données automatique ?</strong> Si le framework observe les changements et rafraîchit l'écran seul, vous êtes en MVVM. Sinon, vous êtes en MVC ou MVP, quel que soit le support.</p>
+</div>
+
+<h3>Comparatif</h3>
+
+<figure class="fig">
+<svg viewBox="0 0 720 296" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Comparaison des liaisons entre vue et modèle dans MVC, MVP et MVVM">
+  <text x="122" y="20" class="t-b" text-anchor="middle">MVC</text>
+  <rect x="52" y="44" width="140" height="46" rx="5" class="bx-g"/>
+  <text x="122" y="72" class="t-bs" text-anchor="middle">Vue</text>
+  <rect x="52" y="126" width="140" height="46" rx="5" class="bx-a"/>
+  <text x="122" y="154" class="t-bs" text-anchor="middle">Contrôleur</text>
+  <rect x="52" y="208" width="140" height="46" rx="5" class="bx-p"/>
+  <text x="122" y="236" class="t-bs" text-anchor="middle">Modèle</text>
+  <path d="M122,126 L122,94" class="ar-a"/>
+  <path d="M122,172 L122,204" class="ar-a"/>
+  <path d="M52,67 L32,67 L32,231 L48,231" class="ar"/>
+  <text x="24" y="150" class="t-ms" text-anchor="middle" transform="rotate(-90 24 150)">lit</text>
+  <text x="122" y="278" class="t-s" text-anchor="middle">la vue lit le modèle</text>
+
+  <text x="363" y="20" class="t-b" text-anchor="middle">MVP</text>
+  <rect x="293" y="44" width="140" height="46" rx="5" class="bx-g"/>
+  <text x="363" y="72" class="t-bs" text-anchor="middle">Vue</text>
+  <rect x="293" y="126" width="140" height="46" rx="5" class="bx-a"/>
+  <text x="363" y="154" class="t-bs" text-anchor="middle">Présentateur</text>
+  <rect x="293" y="208" width="140" height="46" rx="5" class="bx-p"/>
+  <text x="363" y="236" class="t-bs" text-anchor="middle">Modèle</text>
+  <path d="M363,126 L363,94" class="ar-a"/>
+  <text x="371" y="114" class="t-ms t-a">pilote</text>
+  <path d="M363,172 L363,204" class="ar-a"/>
+  <path d="M293,67 L273,67 L273,231 L289,231" class="ar-d"/>
+  <text x="273" y="150" class="t-ms t-rd" text-anchor="middle">✕</text>
+  <text x="363" y="278" class="t-s" text-anchor="middle">la vue ne fait rien d'elle-même</text>
+
+  <text x="604" y="20" class="t-b" text-anchor="middle">MVVM</text>
+  <rect x="534" y="44" width="140" height="46" rx="5" class="bx-g"/>
+  <text x="604" y="72" class="t-bs" text-anchor="middle">Vue</text>
+  <rect x="534" y="126" width="140" height="46" rx="5" class="bx-a"/>
+  <text x="604" y="154" class="t-bs" text-anchor="middle">ViewModel</text>
+  <rect x="534" y="208" width="140" height="46" rx="5" class="bx-p"/>
+  <text x="604" y="236" class="t-bs" text-anchor="middle">Modèle</text>
+  <path d="M604,122 L604,98" class="ar-g" style="marker-start:url(#ahg)"/>
+  <text x="612" y="114" class="t-ms t-gr">liaison auto</text>
+  <path d="M604,172 L604,204" class="ar-a"/>
+  <path d="M534,67 L514,67 L514,231 L530,231" class="ar-d"/>
+  <text x="514" y="150" class="t-ms t-rd" text-anchor="middle">✕</text>
+  <text x="604" y="278" class="t-s" text-anchor="middle">tout se rafraîchit seul</text>
+</svg>
+<figcaption><b>La même question, trois réponses.</b> Ce qui change n'est jamais le modèle : c'est le chemin par lequel les données arrivent à l'écran. En MVVM, plus personne ne porte l'information — la vue et le ViewModel sont branchés l'un sur l'autre une fois pour toutes.</figcaption>
+</figure>
+
+<div class="tw">
+<table>
+<thead><tr><th>&nbsp;</th><th>MVC</th><th>MVP</th><th>MVVM</th></tr></thead>
+<tbody>
+<tr><th>Le troisième rôle</th><td>Contrôleur</td><td>Présentateur</td><td>ViewModel</td></tr>
+<tr><th>La vue lit-elle le modèle&nbsp;?</th><td>Oui, directement</td><td>Non, jamais</td><td>Non, elle se lie au ViewModel</td></tr>
+<tr><th>Le troisième rôle connaît-il la vue&nbsp;?</th><td>Il choisit laquelle afficher</td><td>Oui, il la pilote</td><td>Non, il l'ignore totalement</td></tr>
+<tr><th>Liaison automatique</th><td>Non</td><td>Non</td><td><strong>Oui</strong> — c'est sa raison d'être</td></tr>
+<tr><th>Rapport vue / rôle</th><td>1 contrôleur pour N vues</td><td>1 présentateur pour 1 vue</td><td>1 ViewModel pour N vues</td></tr>
+<tr><th>Terrain habituel</th><td>Web côté serveur (Spring MVC, Symfony)</td><td>Anciennes applis Android, WinForms</td><td>Vue, Angular, WPF, Android moderne</td></tr>
+<tr><th>Testabilité</th><td>Correcte</td><td>Très bonne</td><td>Très bonne</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+<span class="lbl">🎯 Ce qu'ils ont tous en commun</span>
+<p>Les trois patrons répondent à la même question : <strong>comment empêcher que la logique métier se retrouve mélangée au code d'affichage ?</strong> Ils diffèrent seulement sur la façon dont la vue et les données communiquent. Retenez le problème, les solutions se déduisent.</p>
+</div>
+
+<div class="box tip">
+<span class="lbl">💡 Vous ne choisirez presque jamais</span>
+<p>En pratique, le patron vous est imposé par l'outil : Spring MVC vous met en MVC, Vue et Angular vous mettent en MVVM. L'enjeu n'est donc pas de choisir, mais de <strong>reconnaître dans quel patron vous êtes</strong> pour savoir où poser chaque ligne de code.</p>
+</div>
+</section>
+
+<section id="s6">
+<h2>Les architectures d'ensemble</h2>
+<p class="section-sub">On change d'échelle : non plus l'organisation du code, mais celle de l'application entière.</p>
+
+<h3>Monolithe, monolithe modulaire, microservices</h3>
+
+<div class="meta">
+<span class="lbl">🪄 Le grand magasin et la rue commerçante</span>
+<p><strong>Le grand magasin</strong> : tout sous un seul toit, une seule caisse, un seul système d'alarme. Simple, efficace, et l'on circule d'un rayon à l'autre sans sortir. Mais pour repeindre le rayon jouets, on ferme tout le magasin. Et si le courant saute, plus rien ne fonctionne.</p>
+<p><strong>La rue commerçante</strong> : boulangerie, boucherie, librairie. Chacune son local, sa caisse, ses horaires. La boulangerie ferme pour travaux, les autres continuent. Mais désormais, pour un repas complet, il faut faire quatre boutiques sous la pluie — et si la boucherie déménage sans prévenir, le restaurateur d'à côté est en difficulté.</p>
+</div>
+
+<figure class="fig">
+<svg viewBox="0 0 720 332" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Comparaison entre une application monolithique et une architecture en microservices">
+  <text x="20" y="20" class="t-h">MONOLITHE</text>
+  <rect x="20" y="44" width="300" height="170" rx="8" class="bx-soft"/>
+  <text x="170" y="70" class="t-s" text-anchor="middle">un seul livrable, un seul démarrage</text>
+  <rect x="38" y="84" width="126" height="48" rx="4" class="bx"/>
+  <text x="101" y="113" class="t-ms" text-anchor="middle">Clients</text>
+  <rect x="176" y="84" width="126" height="48" rx="4" class="bx"/>
+  <text x="239" y="113" class="t-ms" text-anchor="middle">Commandes</text>
+  <rect x="38" y="146" width="126" height="48" rx="4" class="bx"/>
+  <text x="101" y="175" class="t-ms" text-anchor="middle">Stock</text>
+  <rect x="176" y="146" width="126" height="48" rx="4" class="bx"/>
+  <text x="239" y="175" class="t-ms" text-anchor="middle">Factures</text>
+  <path d="M170,214 L170,242" class="ar"/>
+  <path d="M126,248 L126,282 A44,9 0 0,0 214,282 L214,248" class="bx"/>
+  <ellipse cx="170" cy="248" rx="44" ry="9" class="bx"/>
+  <text x="170" y="274" class="t-ms" text-anchor="middle">Base unique</text>
+  <text x="20" y="318" class="t-s">Simple à exploiter · une panne arrête tout</text>
+
+  <line x1="358" y1="8" x2="358" y2="300" stroke="#dfe4ea" stroke-width="1"/>
+
+  <text x="398" y="20" class="t-h">MICROSERVICES</text>
+  <text x="558" y="58" class="t-s" text-anchor="middle">appels réseau entre services</text>
+  <rect x="398" y="70" width="96" height="56" rx="5" class="bx-a"/>
+  <text x="446" y="103" class="t-ms" text-anchor="middle">Clients</text>
+  <rect x="510" y="70" width="96" height="56" rx="5" class="bx-a"/>
+  <text x="558" y="103" class="t-ms" text-anchor="middle">Commandes</text>
+  <rect x="622" y="70" width="96" height="56" rx="5" class="bx-a"/>
+  <text x="670" y="103" class="t-ms" text-anchor="middle">Stock</text>
+  <path d="M494,98 L506,98" class="ar-d"/>
+  <path d="M606,98 L618,98" class="ar-d"/>
+  <path d="M446,126 L446,148" class="ar"/>
+  <path d="M558,126 L558,148" class="ar"/>
+  <path d="M670,126 L670,148" class="ar"/>
+  <path d="M414,156 L414,180 A32,7 0 0,0 478,180 L478,156" class="bx"/>
+  <ellipse cx="446" cy="156" rx="32" ry="7" class="bx"/>
+  <path d="M526,156 L526,180 A32,7 0 0,0 590,180 L590,156" class="bx"/>
+  <ellipse cx="558" cy="156" rx="32" ry="7" class="bx"/>
+  <path d="M638,156 L638,180 A32,7 0 0,0 702,180 L702,156" class="bx"/>
+  <ellipse cx="670" cy="156" rx="32" ry="7" class="bx"/>
+  <text x="558" y="208" class="t-s" text-anchor="middle">une base par service</text>
+  <text x="398" y="318" class="t-s">Complexe à exploiter · une panne n'arrête qu'un service</text>
+</svg>
+<figcaption><b>Ce que vous gagnez d'un côté, vous le payez de l'autre.</b> À droite, chaque service vit sa vie — mais les trois traits pointillés du haut sont des appels réseau : ils peuvent être lents, échouer, ou tomber en panne. C'est là que se cache toute la difficulté.</figcaption>
+</figure>
+
+<div class="tw">
+<table>
+<thead><tr><th>&nbsp;</th><th>Monolithe</th><th>Monolithe modulaire</th><th>Microservices</th></tr></thead>
+<tbody>
+<tr><th>Déploiement</th><td>1 seul livrable</td><td>1 seul livrable</td><td>N livrables indépendants</td></tr>
+<tr><th>Découpage interne</th><td>Faible ou inexistant</td><td>Modules aux frontières nettes</td><td>Services séparés physiquement</td></tr>
+<tr><th>Base de données</th><td>Une seule</td><td>Une seule, schémas séparés</td><td>Une par service, en principe</td></tr>
+<tr><th>Communication</th><td>Appels de méthodes</td><td>Appels de méthodes</td><td>Réseau (HTTP, messages)</td></tr>
+<tr><th>Une panne&hellip;</th><td>&hellip;arrête tout</td><td>&hellip;arrête tout</td><td>&hellip;n'arrête qu'un service</td></tr>
+<tr><th>Difficulté d'exploitation</th><td>Faible</td><td>Faible</td><td><strong>Élevée</strong></td></tr>
+<tr><th>Équipe adaptée</th><td>1 à 10 personnes</td><td>5 à 30 personnes</td><td>Plusieurs équipes autonomes</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box warn">
+<span class="lbl">⚠️ Les microservices ne sont pas « la version moderne »</span>
+<p>Ce n'est pas un progrès technique, c'est un <strong>arbitrage organisationnel</strong>. On accepte une complexité d'exploitation considérable — réseau, latence, pannes partielles, cohérence des données, supervision — en échange de l'autonomie de plusieurs équipes. Sur un projet à cinq développeurs, ce marché est perdant.</p>
+<p>La recommandation courante du métier reste : <strong>commencez par un monolithe modulaire</strong>, et ne découpez que lorsque la douleur devient réelle et identifiée.</p>
+</div>
+
+<h3>Couches ou tiers&nbsp;?</h3>
+
+<p>Les deux mots se ressemblent, on les confond en permanence, et ils ne parlent pas de la même chose.</p>
+
+<div class="tw">
+<table>
+<thead><tr><th>Couche <em class="en">(layer)</em></th><th>Tier</th></tr></thead>
+<tbody>
+<tr><td>Découpage <strong>logique</strong> — dans le code</td><td>Découpage <strong>physique</strong> — sur les machines</td></tr>
+<tr><td>Des paquets, des dossiers</td><td>Des serveurs, des processus</td></tr>
+<tr><td>Présentation / métier / persistance</td><td>Poste client / serveur applicatif / serveur de base</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+<span class="lbl">🎯 La phrase qui résume</span>
+<p>Une application peut très bien être en <strong>trois couches</strong> et déployée sur <strong>un seul tier</strong> : trois paquets Java bien rangés dans un unique fichier installé sur une seule machine. Couches et tiers sont deux axes indépendants.</p>
+</div>
+
+<h3>Architecture hexagonale</h3>
+
+<div class="meta">
+<span class="lbl">🪄 L'adaptateur de voyage</span>
+<p>Votre ordinateur portable fonctionne en France, au Japon et au Brésil. Vous ne changez pas d'ordinateur : vous changez d'<strong>adaptateur</strong>. L'ordinateur définit ce dont il a besoin ; le monde extérieur s'y branche.</p>
+</div>
+
+<p>L'<strong>architecture hexagonale</strong>, aussi appelée <em class="en">ports and adapters</em> — « ports et adaptateurs » — et proche de la <em class="en">Clean Architecture</em>, pousse l'inversion des dépendances à son terme. Le code métier est placé <strong>au centre</strong> et ne dépend de rien. Autour, des adaptateurs : un pour le web, un pour PostgreSQL, un pour l'envoi d'e-mails.</p>
+
+<figure class="fig">
+<svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Architecture hexagonale : le métier au centre, les adaptateurs autour">
+  <polygon points="268,160 314,80 406,80 452,160 406,240 314,240" class="bx-g"/>
+  <text x="360" y="155" class="t-b" text-anchor="middle">MÉTIER</text>
+  <text x="360" y="176" class="t-s" text-anchor="middle">ne dépend de rien</text>
+
+  <rect x="40" y="44" width="164" height="54" rx="6" class="bx-a"/>
+  <text x="122" y="68" class="t-bs" text-anchor="middle">Web</text>
+  <text x="122" y="86" class="t-s" text-anchor="middle">adaptateur entrant</text>
+  <rect x="516" y="44" width="164" height="54" rx="6" class="bx-a"/>
+  <text x="598" y="68" class="t-bs" text-anchor="middle">Tests</text>
+  <text x="598" y="86" class="t-s" text-anchor="middle">adaptateur entrant</text>
+  <rect x="40" y="222" width="164" height="54" rx="6" class="bx-p"/>
+  <text x="122" y="246" class="t-bs" text-anchor="middle">PostgreSQL</text>
+  <text x="122" y="264" class="t-s" text-anchor="middle">adaptateur sortant</text>
+  <rect x="516" y="222" width="164" height="54" rx="6" class="bx-p"/>
+  <text x="598" y="246" class="t-bs" text-anchor="middle">Messagerie</text>
+  <text x="598" y="264" class="t-s" text-anchor="middle">adaptateur sortant</text>
+
+  <path d="M204,80 L306,88" class="ar"/>
+  <path d="M516,80 L414,88" class="ar"/>
+  <path d="M204,240 L306,232" class="ar"/>
+  <path d="M516,240 L414,232" class="ar"/>
+
+  <circle cx="314" cy="80" r="5.5" class="bx-a"/>
+  <circle cx="406" cy="80" r="5.5" class="bx-a"/>
+  <circle cx="314" cy="240" r="5.5" class="bx-a"/>
+  <circle cx="406" cy="240" r="5.5" class="bx-a"/>
+  <text x="292" y="66" class="t-ms" text-anchor="middle">port</text>
+  <text x="428" y="66" class="t-ms" text-anchor="middle">port</text>
+  <text x="360" y="304" class="t-s" text-anchor="middle">Changer PostgreSQL pour autre chose = écrire un nouvel adaptateur</text>
+</svg>
+<figcaption><b>Toutes les flèches pointent vers le centre.</b> Le métier ne connaît personne : il publie des <i>ports</i> — de simples interfaces Java — et le monde extérieur s'y branche. C'est le « D » de SOLID appliqué à l'application entière.</figcaption>
+</figure>
+
+<p>Le bénéfice : remplacer PostgreSQL par MongoDB revient à écrire un nouvel adaptateur, sans ouvrir une seule ligne du code métier. Le coût : beaucoup plus d'interfaces et de classes de traduction.</p>
+
+<div class="box tip">
+<span class="lbl">💡 Pour l'instant, retenez juste l'idée</span>
+<p>L'hexagonal est un sujet de deuxième année de pratique. Ce que vous devez en garder aujourd'hui : c'est <strong>le même principe</strong> que le « D » de SOLID vu en 3.4, appliqué à l'application entière au lieu d'une seule classe.</p>
+</div>
+</section>
+
+<section id="s7">
+<h2>Deux ponts vers Spring Boot</h2>
+<p class="section-sub">Deux notions qui relient tout ce qui précède à ce que vous ouvrirez la semaine prochaine.</p>
+
+<h3>L'injection de dépendances</h3>
+
+<div class="meta">
+<span class="lbl">🪄 On rebranche la prise</span>
+<p>Vous ne produisez pas votre électricité : vous branchez. Mieux, dans une maison neuve, vous ne posez pas non plus les câbles — l'installation existe, vous n'avez qu'à brancher.</p>
+<p>Le <strong>conteneur IoC</strong> de Spring, c'est cette installation électrique : il fabrique les objets et les branche les uns aux autres à votre place.</p>
+</div>
+
+<p>En 3.4, nous avons fait entrer la dépendance par le constructeur. Il restait un problème : <strong>quelqu'un</strong> doit bien écrire le <code>new</code> quelque part.</p>
+
+<pre><span class="c">// AVANT : quelqu'un doit tout assembler à la main</span>
+<span class="t">ClientDao</span> dao = <span class="k">new</span> <span class="t">ClientDaoPostgres</span>(connexion);
+<span class="t">ClientService</span> service = <span class="k">new</span> <span class="t">ClientService</span>(dao);
+<span class="t">ClientController</span> ctrl = <span class="k">new</span> <span class="t">ClientController</span>(service);
+<span class="c">// ... et ainsi de suite sur 300 classes</span></pre>
+
+<pre><span class="c">// APRÈS : le conteneur assemble seul</span>
+<span class="k">@Service</span>                                  <span class="c">// « je suis un objet à gérer »</span>
+<span class="k">public class</span> <span class="t">ClientService</span> {
+
+    <span class="k">private final</span> <span class="t">ClientDao</span> dao;
+
+    <span class="k">public</span> <span class="f">ClientService</span>(<span class="t">ClientDao</span> dao) {  <span class="c">// « il me faut un ClientDao »</span>
+        <span class="k">this</span>.dao = dao;                     <span class="c">// Spring le trouve et le fournit</span>
+    }
+}</pre>
+
+<p><strong>Analysons ce code ligne par ligne :</strong></p>
+<ol>
+  <li><code>@Service</code> — l'étiquette déclare la classe au conteneur. Au démarrage, Spring parcourt le projet, repère l'étiquette et fabrique <strong>un</strong> exemplaire de la classe.</li>
+  <li><code>ClientService(ClientDao dao)</code> — le constructeur exprime un besoin : « donnez-moi quelque chose qui respecte le contrat <code>ClientDao</code> ».</li>
+  <li>Spring cherche dans son inventaire une classe qui implémente ce contrat, et la passe automatiquement. Vous n'écrivez plus aucun <code>new</code>.</li>
+</ol>
+
+<p>C'est l'inversion de contrôle de la section 2, appliquée non plus au déroulement du programme mais à la <strong>construction des objets</strong>.</p>
+
+<figure class="fig">
+<svg viewBox="0 0 720 306" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Assemblage manuel des objets contre assemblage par le conteneur de Spring">
+  <text x="20" y="20" class="t-h">SANS CONTENEUR</text>
+  <rect x="20" y="46" width="290" height="46" rx="5" class="bx"/>
+  <text x="165" y="75" class="t-m" text-anchor="middle">new ClientDaoPostgres(cnx)</text>
+  <path d="M165,92 L165,122" class="ar"/>
+  <rect x="20" y="126" width="290" height="46" rx="5" class="bx"/>
+  <text x="165" y="155" class="t-m" text-anchor="middle">new ClientService(dao)</text>
+  <path d="M165,172 L165,202" class="ar"/>
+  <rect x="20" y="206" width="290" height="46" rx="5" class="bx"/>
+  <text x="165" y="235" class="t-m" text-anchor="middle">new ClientController(service)</text>
+  <text x="20" y="284" class="t-s">Vous écrivez chaque assemblage, à la main,</text>
+  <text x="20" y="300" class="t-s">pour chacune des classes du projet.</text>
+
+  <line x1="358" y1="8" x2="358" y2="292" stroke="#dfe4ea" stroke-width="1"/>
+
+  <text x="398" y="20" class="t-h">AVEC LE CONTENEUR IoC</text>
+  <rect x="392" y="34" width="308" height="228" rx="8" class="bx-dash"/>
+  <text x="546" y="56" class="t-s" text-anchor="middle">Conteneur Spring</text>
+  <rect x="412" y="68" width="268" height="46" rx="5" class="bx-a"/>
+  <text x="546" y="97" class="t-m" text-anchor="middle">@RestController</text>
+  <rect x="412" y="148" width="268" height="46" rx="5" class="bx-g"/>
+  <text x="546" y="177" class="t-m" text-anchor="middle">@Service</text>
+  <rect x="412" y="208" width="268" height="46" rx="5" class="bx-p"/>
+  <text x="546" y="237" class="t-m" text-anchor="middle">@Repository</text>
+  <path d="M546,208 L546,198" class="ar-a"/>
+  <path d="M546,148 L546,118" class="ar-a"/>
+  <text x="556" y="136" class="t-ms t-a">injecte</text>
+  <text x="398" y="284" class="t-s">Vous posez une étiquette. Le conteneur fabrique</text>
+  <text x="398" y="300" class="t-s">les objets et les branche entre eux.</text>
+</svg>
+<figcaption><b>Le même résultat, sans une seule ligne d'assemblage.</b> À droite, aucune classe n'écrit <code>new</code> : chacune déclare ce dont elle a besoin dans son constructeur, et le conteneur se charge du branchement au démarrage.</figcaption>
+</figure>
+
+<div class="box tip">
+<span class="lbl">💡 Injectez toujours par le constructeur</span>
+<p>Spring propose trois voies : constructeur, setter, ou directement sur l'attribut avec <code>@Autowired</code>. Préférez systématiquement le <strong>constructeur</strong> : il rend les dépendances visibles, autorise le <code>final</code>, et permet d'instancier la classe à la main dans un test.</p>
+</div>
+
+<h3>L'ORM</h3>
+
+<div class="meta">
+<span class="lbl">🪄 L'interprète</span>
+<p>Deux personnes doivent travailler ensemble. L'une parle le langage des tableaux : lignes, colonnes, jointures. L'autre parle le langage des objets : classes, attributs, références. Elles ne se comprennent pas. On engage un <strong>interprète</strong>, qui traduit dans les deux sens sans jamais participer à la conversation.</p>
+</div>
+
+<p>Un <strong>ORM</strong> <em class="en">(Object-Relational Mapping — « correspondance objet-relationnel »)</em> est cet interprète. En Java, la norme s'appelle <strong>JPA</strong> et l'implémentation la plus répandue <strong>Hibernate</strong>.</p>
+
+<figure class="fig">
+<svg viewBox="0 0 720 262" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="L'ORM traduit entre les objets Java et les lignes d'une table">
+  <text x="20" y="24" class="t-h">MONDE OBJET</text>
+  <rect x="20" y="44" width="200" height="140" rx="6" class="bx-a"/>
+  <text x="120" y="76" class="t-bs" text-anchor="middle">class Client</text>
+  <text x="42" y="110" class="t-m">Long id</text>
+  <text x="42" y="134" class="t-m">String nom</text>
+  <text x="42" y="158" class="t-m">String email</text>
+
+  <rect x="300" y="44" width="130" height="140" rx="6" class="bx-g"/>
+  <text x="365" y="102" class="t-b" text-anchor="middle">ORM</text>
+  <text x="365" y="124" class="t-s" text-anchor="middle">JPA</text>
+  <text x="365" y="144" class="t-s" text-anchor="middle">Hibernate</text>
+
+  <text x="510" y="24" class="t-h">TABLE client</text>
+  <rect x="510" y="44" width="190" height="140" rx="6" class="bx"/>
+  <rect x="510" y="44" width="190" height="32" rx="6" fill="#f3f5f8" stroke="#c8cfd9" stroke-width="1.5"/>
+  <line x1="560" y1="44" x2="560" y2="184" stroke="#dde2e9" stroke-width="1.2"/>
+  <line x1="625" y1="44" x2="625" y2="184" stroke="#dde2e9" stroke-width="1.2"/>
+  <line x1="510" y1="76" x2="700" y2="76" stroke="#c8cfd9" stroke-width="1.5"/>
+  <line x1="510" y1="112" x2="700" y2="112" stroke="#dde2e9" stroke-width="1.2"/>
+  <line x1="510" y1="148" x2="700" y2="148" stroke="#dde2e9" stroke-width="1.2"/>
+  <text x="535" y="66" class="t-ms" text-anchor="middle">id</text>
+  <text x="592" y="66" class="t-ms" text-anchor="middle">nom</text>
+  <text x="662" y="66" class="t-ms" text-anchor="middle">email</text>
+  <text x="535" y="99" class="t-ms" text-anchor="middle">3</text>
+  <text x="592" y="99" class="t-ms" text-anchor="middle">Dupont</text>
+  <text x="662" y="99" class="t-ms" text-anchor="middle">d.dupont</text>
+  <text x="535" y="135" class="t-ms" text-anchor="middle">4</text>
+  <text x="592" y="135" class="t-ms" text-anchor="middle">Martin</text>
+  <text x="662" y="135" class="t-ms" text-anchor="middle">a.martin</text>
+  <text x="605" y="171" class="t-ms" text-anchor="middle">…</text>
+
+  <path d="M224,96 L296,96" class="ar-a"/>
+  <path d="M434,96 L506,96" class="ar-a"/>
+  <path d="M506,150 L434,150" class="ar-g"/>
+  <path d="M296,150 L224,150" class="ar-g"/>
+
+  <line x1="20" y1="222" x2="46" y2="222" stroke="#33447e" stroke-width="2"/>
+  <text x="56" y="227" class="t-s">save(client) devient un INSERT ou un UPDATE</text>
+  <line x1="20" y1="246" x2="46" y2="246" stroke="#0f7a55" stroke-width="2"/>
+  <text x="56" y="251" class="t-s">la ligne rapportée par le SELECT redevient un objet Client</text>
+</svg>
+<figcaption><b>Un traducteur, pas un magicien.</b> L'ORM connaît la correspondance colonne ↔ attribut et fabrique le SQL à votre place. Il ne devine ni vos index, ni vos jointures : c'est vous qui restez responsable de ce qui part réellement vers la base.</figcaption>
+</figure>
+
+<div class="tw">
+<table>
+<thead><tr><th>Ce que vous écrivez</th><th>Ce que l'ORM produit</th></tr></thead>
+<tbody>
+<tr><td><code>repository.findById(3L)</code></td><td><code>SELECT * FROM client WHERE id = 3</code></td></tr>
+<tr><td><code>repository.save(client)</code></td><td><code>INSERT</code> ou <code>UPDATE</code>, selon le cas</td></tr>
+<tr><td><code>client.getCommandes()</code></td><td><code>SELECT * FROM commande WHERE id_client = 3</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>La traduction n'est pas parfaite, parce que les deux mondes ne sont pas superposables. On appelle cet écart le <strong>décalage objet-relationnel</strong> <em class="en">(impedance mismatch)</em> :</p>
+
+<div class="tw">
+<table>
+<thead><tr><th>En Java</th><th>En base relationnelle</th><th>Le problème</th></tr></thead>
+<tbody>
+<tr><td>L'héritage existe</td><td>Il n'existe pas</td><td>Il faut choisir une stratégie de traduction</td></tr>
+<tr><td>Deux objets peuvent être identiques sans être le même</td><td>La clé primaire tranche</td><td>Deux notions d'identité différentes</td></tr>
+<tr><td>Une référence est à sens unique</td><td>Une jointure se lit dans les deux sens</td><td>Il faut désigner un côté « propriétaire »</td></tr>
+<tr><td>Les collections sont chargées en mémoire</td><td>Une table peut faire dix millions de lignes</td><td>Quand charge-t-on&nbsp;? D'où le chargement paresseux</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box warn">
+<span class="lbl">⚠️ L'ORM ne vous dispense pas de savoir écrire du SQL</span>
+<p>Il le rend au contraire <strong>plus nécessaire</strong>. Un ORM mal utilisé transforme une boucle sur 100 clients en 101 requêtes — c'est le fameux problème « N+1 ». Sans lire le SQL généré, vous ne verrez jamais le problème ; vous constaterez seulement que l'application est lente. Vos séances PostgreSQL vont servir plus que vous ne le pensez.</p>
+</div>
+
+</section>
+
+<section id="s8">
+<h2>Les API</h2>
+<p class="section-sub">Le guichet par lequel un logiciel s'adresse à un autre logiciel.</p>
+
+<h3>C'est quoi une API&nbsp;?</h3>
+
+<div class="meta">
+<span class="lbl">🪄 La carte du restaurant</span>
+<p>Vous vous asseyez à une table. Personne ne vous conduit en cuisine pour choisir vos casseroles. On vous tend <strong>la carte</strong> : la liste exacte de ce que vous pouvez demander, et sous quelle forme.</p>
+<p>Vous commandez « une pizza margherita ». Vous ne dites pas « allume le four à 280 degrés, étale la pâte, ajoute la sauce ». Vous ignorez tout de la cuisine, et c'est très bien ainsi.</p>
+<p>Cette carte est un <strong>engagement</strong> : ce qui y figure est disponible, ce qui n'y figure pas ne l'est pas. Et le restaurant peut changer de cuisinier, de four, de fournisseur — tant que la carte ne change pas, vous ne vous apercevez de rien.</p>
+</div>
+
+<p>Une <strong>API</strong> <em class="en">(Application Programming Interface — « interface de programmation applicative »)</em> est la liste des opérations qu'un logiciel met à la disposition d'un autre logiciel, accompagnée de la manière exacte de les demander et de la forme exacte des réponses.</p>
+
+<p>Trois mots résument tout : une API est un <strong>contrat</strong>, elle est <strong>publique</strong>, et elle <strong>cache</strong> ce qu'il y a derrière.</p>
+
+<figure class="fig">
+<svg viewBox="0 0 720 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Une API sert de guichet unique entre les applications clientes et le système">
+  <text x="20" y="24" class="t-h">LES CLIENTS</text>
+  <rect x="20" y="48" width="150" height="48" rx="5" class="bx"/>
+  <text x="95" y="77" class="t-ms" text-anchor="middle">Site web</text>
+  <rect x="20" y="116" width="150" height="48" rx="5" class="bx"/>
+  <text x="95" y="145" class="t-ms" text-anchor="middle">Application mobile</text>
+  <rect x="20" y="184" width="150" height="48" rx="5" class="bx"/>
+  <text x="95" y="213" class="t-ms" text-anchor="middle">Autre logiciel</text>
+
+  <rect x="250" y="30" width="180" height="225" rx="6" class="bx-a"/>
+  <text x="340" y="58" class="t-b" text-anchor="middle">API</text>
+  <text x="340" y="78" class="t-s" text-anchor="middle">le contrat</text>
+  <line x1="266" y1="92" x2="414" y2="92" stroke="#c9d2e8" stroke-width="1.2"/>
+  <text x="266" y="118" class="t-ms">GET /clients</text>
+  <text x="266" y="142" class="t-ms">GET /clients/3</text>
+  <text x="266" y="166" class="t-ms">POST /clients</text>
+  <text x="266" y="190" class="t-ms">PUT /clients/3</text>
+  <text x="266" y="214" class="t-ms">DELETE /clients/3</text>
+  <text x="340" y="240" class="t-s" text-anchor="middle">tout le reste est fermé</text>
+
+  <text x="470" y="24" class="t-h">LE SYSTÈME</text>
+  <rect x="470" y="30" width="230" height="200" rx="6" class="bx-soft"/>
+  <rect x="490" y="62" width="190" height="46" rx="5" class="bx-g"/>
+  <text x="585" y="91" class="t-ms" text-anchor="middle">Règles métier</text>
+  <path d="M525,140 L525,190 A60,10 0 0,0 645,190 L645,140" class="bx"/>
+  <ellipse cx="585" cy="140" rx="60" ry="10" class="bx"/>
+  <text x="585" y="176" class="t-ms" text-anchor="middle">PostgreSQL</text>
+  <text x="585" y="252" class="t-s" text-anchor="middle">invisible depuis l'extérieur</text>
+
+  <path d="M174,72 L246,72" class="ar-a"/>
+  <path d="M174,140 L246,140" class="ar-a"/>
+  <path d="M174,208 L246,208" class="ar-a"/>
+  <path d="M434,140 L466,140" class="ar-a"/>
+
+  <path d="M170,300 L516,300" class="ar-d"/>
+  <text x="345" y="306" class="t-b t-rd" text-anchor="middle">✕</text>
+  <text x="345" y="330" class="t-s" text-anchor="middle">aucun client ne parle directement à la base</text>
+</svg>
+<figcaption><b>Un seul guichet, trois clients.</b> L'API expose une liste finie d'opérations et rien d'autre. Derrière, on peut changer les règles, changer de base, tout réécrire : tant que la liste ne bouge pas, les trois clients continuent de fonctionner sans être modifiés.</figcaption>
+</figure>
+
+<div class="box warn">
+<span class="lbl">⚠️ Une API n'est pas forcément sur Internet</span>
+<p>C'est la confusion numéro un. Le mot « API » ne dit rien du réseau. Les méthodes <code>public</code> d'une classe Java <strong>sont</strong> son API : c'est ce que la classe promet aux autres classes.</p>
+<p>Quand vous écrivez <code>maListe.add("Dupont")</code>, vous consommez l'API de la classe <code>List</code>. Aucun réseau, aucune adresse web. Une API web est simplement une API dont le guichet se trouve au bout d'un câble.</p>
+</div>
+
+<pre><span class="c">// L'API de cette classe, c'est exactement ce qui est « public »</span>
+<span class="k">public class</span> <span class="t">Panier</span> {
+
+    <span class="k">private</span> <span class="t">List</span>&lt;<span class="t">Article</span>&gt; articles;   <span class="c">// invisible : ce n'est PAS l'API</span>
+
+    <span class="k">public void</span> <span class="f">ajouter</span>(<span class="t">Article</span> a) { … }  <span class="c">// dans la carte</span>
+    <span class="k">public double</span> <span class="f">total</span>() { … }         <span class="c">// dans la carte</span>
+
+    <span class="k">private void</span> <span class="f">recalculer</span>() { … }     <span class="c">// la cuisine : pas dans la carte</span>
+}</pre>
+
+<p><strong>Analysons ce code ligne par ligne :</strong></p>
+<ol>
+  <li><code>private List&lt;Article&gt; articles</code> — le stockage interne. Vous pouvez le remplacer demain par un tableau ou une base : personne à l'extérieur ne s'en apercevra.</li>
+  <li><code>public void ajouter(...)</code> et <code>public double total()</code> — les deux plats de la carte. Ce sont des <strong>promesses</strong> : d'autres classes s'appuient dessus.</li>
+  <li><code>private void recalculer()</code> — un détail de préparation. Le rendre <code>public</code> par confort serait un engagement pris sans y penser.</li>
+</ol>
+
+<div class="box tip">
+<span class="lbl">💡 <code>public</code> est une signature au bas d'un contrat</span>
+<p>Tout ce que vous déclarez <code>public</code> devient impossible à modifier sans casser quelqu'un. La bonne habitude est l'inverse du réflexe débutant : <strong>tout est <code>private</code> par défaut</strong>, et l'on ouvre uniquement ce qui doit l'être.</p>
+</div>
+
+<h4>Pourquoi c'est une si bonne idée</h4>
+
+<div class="tw">
+<table>
+<thead><tr><th>Bénéfice</th><th>Concrètement</th></tr></thead>
+<tbody>
+<tr><td><strong>Découplage</strong></td><td>Vous réécrivez tout l'intérieur sans prévenir personne, tant que la carte ne change pas</td></tr>
+<tr><td><strong>Réutilisation</strong></td><td>Un seul serveur alimente le site web, l'application mobile et le logiciel du partenaire</td></tr>
+<tr><td><strong>Sécurité</strong></td><td>Le client ne voit ni la base, ni les règles, ni les champs que vous ne montrez pas</td></tr>
+<tr><td><strong>Répartition du travail</strong></td><td>L'équipe front et l'équipe back se mettent d'accord sur la carte, puis travaillent séparément</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>De l'API locale à l'API web</h3>
+
+<p>Une <strong>API web</strong> est une API dont les appels passent par le réseau, en HTTP. Le principe ne change pas ; seul le moyen de transport change. Une requête HTTP contient toujours quatre choses :</p>
+
+<pre><span class="c">// ── LA REQUÊTE ───────────────────────────────────────────────</span>
+<span class="k">GET</span> /clients/<span class="n">3</span> HTTP/<span class="n">1.1</span>          <span class="c">// 1. le verbe + 2. la ressource visée</span>
+Host: api.exemple.fr               <span class="c">// 3. les en-têtes</span>
+Accept: application/json           <span class="c">//    « réponds-moi en JSON »</span>
+                                   <span class="c">// 4. le corps : vide pour un GET</span></pre>
+
+<pre><span class="c">// ── LA RÉPONSE ───────────────────────────────────────────────</span>
+HTTP/<span class="n">1.1</span> <span class="n">200</span> OK                     <span class="c">// 1. le code de statut</span>
+Content-Type: application/json     <span class="c">// 2. les en-têtes</span>
+
+{                                  <span class="c">// 3. le corps : la donnée demandée</span>
+  <span class="s">"id"</span>: <span class="n">3</span>,
+  <span class="s">"nom"</span>: <span class="s">"Dupont"</span>,
+  <span class="s">"email"</span>: <span class="s">"d.dupont@exemple.fr"</span>
+}</pre>
+
+<p><strong>Analysons cet échange ligne par ligne :</strong></p>
+<ol>
+  <li><code>GET</code> — le <strong>verbe</strong> : l'intention. Ici, lire.</li>
+  <li><code>/clients/3</code> — la <strong>ressource</strong> : de quoi on parle. Le client numéro 3.</li>
+  <li><code>Accept: application/json</code> — un <strong>en-tête</strong> : une précision sur la demande. Le client annonce le format qu'il souhaite recevoir.</li>
+  <li><code>200 OK</code> — le <strong>code de statut</strong> : le résultat en un nombre. Tout s'est bien passé.</li>
+  <li>Le <strong>corps</strong> de la réponse, en JSON. Remarquez qu'il n'y a ni mot de passe, ni identifiant interne : c'est un DTO, pas l'entité complète.</li>
+</ol>
+
+<div class="box recall">
+<span class="lbl">📝 Vous connaissez déjà ce format</span>
+<p>Le <strong>JSON</strong> <em class="en">(JavaScript Object Notation)</em> n'est qu'une manière d'écrire un objet en texte : des paires <code>"clé": valeur</code> entre accolades, des listes entre crochets. Un objet Java devient du JSON, et inversement — c'est exactement ce que faisait la bibliothèque Gson dans l'exemple de la section 2.</p>
+</div>
+
+<h3>L'API REST</h3>
+
+<div class="meta">
+<span class="lbl">🪄 Le distributeur automatique</span>
+<p>Un distributeur ne vous reconnaît pas. Il ne se souvient pas que vous êtes déjà passé ce matin, ni de ce que vous aviez choisi. Chaque achat doit contenir <strong>tout le nécessaire</strong> : la pièce et le code du produit.</p>
+<p>C'est une contrainte pour vous. C'est ce qui permet d'aligner dix distributeurs identiques dans le hall : n'importe lequel peut vous servir, sans qu'ils aient à se raconter votre journée.</p>
+</div>
+
+<p><strong>REST</strong> <em class="en">(REpresentational State Transfer)</em> n'est ni un langage, ni une bibliothèque, ni une norme officielle. C'est un <strong>style</strong> : un ensemble de conventions pour concevoir une API web. Une API qui les respecte est dite <em>RESTful</em>.</p>
+
+<p>Quatre règles vous suffiront cette année :</p>
+
+<div class="tw">
+<table>
+<thead><tr><th>&nbsp;</th><th>La règle</th><th>Ce qu'elle interdit</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Tout est une <strong>ressource</strong>, désignée par une adresse</td><td>Mettre un verbe dans l'URL</td></tr>
+<tr><td>2</td><td>Le <strong>verbe HTTP</strong> dit ce qu'on fait de la ressource</td><td>Tout faire en <code>GET</code> ou en <code>POST</code></td></tr>
+<tr><td>3</td><td>Chaque appel est <strong>sans état</strong> <em class="en">(stateless)</em> et se suffit à lui-même</td><td>Compter sur ce que le serveur « se rappelle » de l'appel précédent</td></tr>
+<tr><td>4</td><td>Le serveur renvoie une <strong>représentation</strong> de la ressource — en général du JSON</td><td>Renvoyer une page HTML à un logiciel</td></tr>
+</tbody>
+</table>
+</div>
+
+<figure class="fig">
+<svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Correspondance entre les verbes HTTP, les opérations CRUD et les instructions SQL">
+  <text x="20" y="24" class="t-h">CE QUE DEMANDE LE CLIENT</text>
+  <text x="360" y="24" class="t-h" text-anchor="middle">INTENTION</text>
+  <text x="700" y="24" class="t-h" text-anchor="end">CE QUE FAIT LA BASE</text>
+
+  <rect x="20" y="48" width="230" height="48" rx="5" class="bx"/>
+  <text x="135" y="77" class="t-m" text-anchor="middle">POST /clients</text>
+  <rect x="290" y="48" width="140" height="48" rx="5" class="bx-g"/>
+  <text x="360" y="77" class="t-bs" text-anchor="middle">Create</text>
+  <rect x="470" y="48" width="230" height="48" rx="5" class="bx-soft"/>
+  <text x="585" y="77" class="t-ms" text-anchor="middle">INSERT INTO client …</text>
+  <path d="M254,72 L286,72" class="ar"/>
+  <path d="M434,72 L466,72" class="ar"/>
+
+  <rect x="20" y="106" width="230" height="48" rx="5" class="bx"/>
+  <text x="135" y="135" class="t-m" text-anchor="middle">GET /clients/3</text>
+  <rect x="290" y="106" width="140" height="48" rx="5" class="bx-a"/>
+  <text x="360" y="135" class="t-bs" text-anchor="middle">Read</text>
+  <rect x="470" y="106" width="230" height="48" rx="5" class="bx-soft"/>
+  <text x="585" y="135" class="t-ms" text-anchor="middle">SELECT … WHERE id = 3</text>
+  <path d="M254,130 L286,130" class="ar"/>
+  <path d="M434,130 L466,130" class="ar"/>
+
+  <rect x="20" y="164" width="230" height="48" rx="5" class="bx"/>
+  <text x="135" y="193" class="t-m" text-anchor="middle">PUT /clients/3</text>
+  <rect x="290" y="164" width="140" height="48" rx="5" class="bx-w"/>
+  <text x="360" y="193" class="t-bs" text-anchor="middle">Update</text>
+  <rect x="470" y="164" width="230" height="48" rx="5" class="bx-soft"/>
+  <text x="585" y="193" class="t-ms" text-anchor="middle">UPDATE client SET …</text>
+  <path d="M254,188 L286,188" class="ar"/>
+  <path d="M434,188 L466,188" class="ar"/>
+
+  <rect x="20" y="222" width="230" height="48" rx="5" class="bx"/>
+  <text x="135" y="251" class="t-m" text-anchor="middle">DELETE /clients/3</text>
+  <rect x="290" y="222" width="140" height="48" rx="5" class="bx-p"/>
+  <text x="360" y="251" class="t-bs" text-anchor="middle">Delete</text>
+  <rect x="470" y="222" width="230" height="48" rx="5" class="bx-soft"/>
+  <text x="585" y="251" class="t-ms" text-anchor="middle">DELETE FROM client …</text>
+  <path d="M254,246 L286,246" class="ar"/>
+  <path d="M434,246 L466,246" class="ar"/>
+
+  <text x="360" y="292" class="t-s" text-anchor="middle">L'adresse ne change jamais : seul le verbe dit ce qu'on veut faire.</text>
+</svg>
+<figcaption><b>Quatre opérations, et c'est tout.</b> Les quatre lettres de CRUD que vous connaissez depuis vos séances SQL sont exactement les quatre verbes HTTP d'une API REST. Vous savez déjà lire la colonne de droite — il ne vous reste qu'à apprendre celle de gauche.</figcaption>
+</figure>
+
+<div class="box recall">
+<span class="lbl">📝 Le CRUD, vous le pratiquez depuis vos séances SQL</span>
+<p><strong>C</strong>reate, <strong>R</strong>ead, <strong>U</strong>pdate, <strong>D</strong>elete : les quatre opérations élémentaires sur une donnée. Vous les écriviez en SQL — <code>INSERT</code>, <code>SELECT</code>, <code>UPDATE</code>, <code>DELETE</code>. Une API REST leur donne simplement quatre portes d'entrée sur le réseau.</p>
+</div>
+
+<h4>Les codes de statut</h4>
+
+<p>Le nombre renvoyé par le serveur n'est pas décoratif : c'est la réponse principale. Un client bien écrit le lit <strong>avant</strong> de regarder le corps.</p>
+
+<div class="tw">
+<table>
+<thead><tr><th>Famille</th><th>Code</th><th>Signification</th><th>Quand</th></tr></thead>
+<tbody>
+<tr><td rowspan="3"><strong>2xx</strong><br>ça a marché</td><td><code>200</code></td><td>OK</td><td>Lecture ou mise à jour réussie</td></tr>
+<tr><td><code>201</code></td><td>Created</td><td>Après un <code>POST</code> : la ressource a été créée</td></tr>
+<tr><td><code>204</code></td><td>No Content</td><td>Après un <code>DELETE</code> : réussi, rien à renvoyer</td></tr>
+<tr><td rowspan="4"><strong>4xx</strong><br>le client s'est trompé</td><td><code>400</code></td><td>Bad Request</td><td>Données envoyées invalides</td></tr>
+<tr><td><code>401</code></td><td>Unauthorized</td><td>Non authentifié : on ne sait pas qui vous êtes</td></tr>
+<tr><td><code>403</code></td><td>Forbidden</td><td>Authentifié, mais pas le droit</td></tr>
+<tr><td><code>404</code></td><td>Not Found</td><td>La ressource n'existe pas</td></tr>
+<tr><td><strong>5xx</strong><br>le serveur s'est trompé</td><td><code>500</code></td><td>Internal Server Error</td><td>Une erreur non prévue côté serveur</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box warn">
+<span class="lbl">⚠️ 401 et 403 ne veulent pas dire la même chose</span>
+<p><code>401</code> signifie « je ne sais pas qui vous êtes » — il faut s'authentifier. <code>403</code> signifie « je sais très bien qui vous êtes, et vous n'avez pas le droit ». Les confondre est le classique du QCM.</p>
+</div>
+
+<div class="box warn">
+<span class="lbl">⚠️ Trois pièges de conception</span>
+<p><strong>Le verbe dans l'adresse.</strong> On écrit <code>DELETE /clients/3</code>, jamais <code>GET /supprimerClient?id=3</code>. L'adresse nomme une chose, le verbe dit ce qu'on lui fait.</p>
+<p><strong>REST n'est pas JSON.</strong> On peut faire du REST en XML, et une API qui renvoie du JSON n'est pas RESTful pour autant. Le format et le style sont deux questions indépendantes.</p>
+<p><strong><code>POST</code> et <code>PUT</code> ne sont pas interchangeables.</strong> <code>POST /clients</code> crée un nouveau client — l'appeler dix fois crée dix clients. <code>PUT /clients/3</code> remplace le client 3 — l'appeler dix fois donne le même résultat qu'une seule fois. On dit que <code>PUT</code> est <strong>idempotent</strong>.</p>
+</div>
+
+<h3>Le flux d'une donnée, de bout en bout</h3>
+
+<p>Voici le schéma qui relie tout ce que vous avez vu aujourd'hui — et tout ce que vous savez déjà. Suivez une seule information, le client numéro 3, sur l'aller et le retour.</p>
+
+<figure class="fig">
+<svg viewBox="0 0 720 546" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Le trajet complet d'une donnée, du navigateur à PostgreSQL et retour">
+  <rect x="200" y="14" width="320" height="62" rx="6" class="bx-soft"/>
+  <text x="360" y="42" class="t-b" text-anchor="middle">Client</text>
+  <text x="360" y="62" class="t-s" text-anchor="middle">navigateur, mobile, autre logiciel</text>
+
+  <rect x="200" y="118" width="320" height="62" rx="6" class="bx-a"/>
+  <text x="360" y="146" class="t-b" text-anchor="middle">@RestController</text>
+  <text x="360" y="166" class="t-s" text-anchor="middle">traduit HTTP en objets Java</text>
+
+  <rect x="200" y="222" width="320" height="62" rx="6" class="bx-g"/>
+  <text x="360" y="250" class="t-b" text-anchor="middle">@Service</text>
+  <text x="360" y="270" class="t-s" text-anchor="middle">applique les règles métier</text>
+
+  <rect x="200" y="326" width="320" height="62" rx="6" class="bx-p"/>
+  <text x="360" y="354" class="t-b" text-anchor="middle">@Repository + ORM</text>
+  <text x="360" y="374" class="t-s" text-anchor="middle">fabrique et envoie le SQL</text>
+
+  <path d="M250,432 L250,486 A110,14 0 0,0 470,486 L470,432" class="bx"/>
+  <ellipse cx="360" cy="432" rx="110" ry="14" class="bx"/>
+  <text x="360" y="472" class="t-b" text-anchor="middle">PostgreSQL</text>
+
+  <path d="M290,76 L290,114" class="ar-w"/>
+  <path d="M430,116 L430,78" class="ar-g"/>
+  <text x="282" y="94" class="t-ms t-wr" text-anchor="end">GET /clients/3</text>
+  <text x="438" y="94" class="t-ms t-gr">200 OK + JSON</text>
+
+  <path d="M290,180 L290,218" class="ar-w"/>
+  <path d="M430,220 L430,182" class="ar-g"/>
+  <text x="282" y="198" class="t-ms t-wr" text-anchor="end">id = 3  (Long)</text>
+  <text x="438" y="198" class="t-ms t-gr">ClientDto</text>
+
+  <path d="M290,284 L290,322" class="ar-w"/>
+  <path d="M430,324 L430,286" class="ar-g"/>
+  <text x="282" y="302" class="t-ms t-wr" text-anchor="end">trouverParId(3)</text>
+  <text x="438" y="302" class="t-ms t-gr">Client  (objet)</text>
+
+  <path d="M290,388 L290,426" class="ar-w"/>
+  <path d="M430,428 L430,390" class="ar-g"/>
+  <text x="282" y="406" class="t-ms t-wr" text-anchor="end">SELECT * FROM client WHERE id = 3</text>
+  <text x="438" y="406" class="t-ms t-gr">1 ligne</text>
+
+  <line x1="150" y1="524" x2="176" y2="524" stroke="#b8791a" stroke-width="2"/>
+  <text x="186" y="529" class="t-s">la demande descend, en se traduisant à chaque étage</text>
+  <line x1="150" y1="502" x2="176" y2="502" stroke="#0f7a55" stroke-width="2"/>
+  <text x="186" y="507" class="t-s">la réponse remonte, en se retraduisant en sens inverse</text>
+</svg>
+<figcaption><b>Le schéma à retenir de toute la séance.</b> Une même information change quatre fois de forme : texte HTTP, objet Java, requête SQL, ligne de table — puis refait le chemin inverse. Chaque étage ne connaît que le langage de son voisin immédiat.</figcaption>
+</figure>
+
+<div class="tw">
+<table>
+<thead><tr><th>&nbsp;</th><th>Étape</th><th>Ce qui circule</th><th>Sous quelle forme</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Le client appelle</td><td><code>GET /clients/3</code></td><td>Texte HTTP</td></tr>
+<tr><td>2</td><td>Le contrôleur reçoit</td><td>L'identifiant extrait de l'adresse</td><td><code>Long id = 3</code></td></tr>
+<tr><td>3</td><td>Le service décide</td><td>L'appel métier</td><td>Méthode Java</td></tr>
+<tr><td>4</td><td>Le repository interroge</td><td>La requête fabriquée par l'ORM</td><td>SQL</td></tr>
+<tr><td>5</td><td>PostgreSQL répond</td><td>Une ligne de la table</td><td>Enregistrement</td></tr>
+<tr><td>6</td><td>L'ORM traduit</td><td>La ligne devient un objet</td><td><code>Client</code></td></tr>
+<tr><td>7</td><td>Le contrôleur filtre</td><td>On ne garde que les champs publics</td><td><code>ClientDto</code></td></tr>
+<tr><td>8</td><td>Le client reçoit</td><td>La réponse</td><td><code>200 OK</code> + JSON</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+<span class="lbl">🎯 Lisez ce tableau à l'envers</span>
+<p>Les étapes 4 et 5 sont vos séances PostgreSQL. Les étapes 3 et 6 sont vos séances de POO Java. Les étapes 1, 2, 7 et 8 sont ce que Spring Boot vous fera écrire dès la semaine prochaine. <strong>Il ne vous manquait que le milieu du tuyau.</strong></p>
+</div>
+
+<div class="box tip">
+<span class="lbl">💡 Le réflexe à prendre devant n'importe quel bug</span>
+<p>Quand une application ne renvoie pas ce qu'on attend, ne cherchez pas partout : <strong>descendez le schéma étage par étage</strong>. La donnée est-elle correcte en base ? Le repository la remonte-t-il ? Le service la transforme-t-il ? Le contrôleur la renvoie-t-il ? En quatre questions, vous avez toujours trouvé l'étage fautif.</p>
+</div>
+</section>
+
+<section id="s9">
+<h2>Où se place Spring Boot</h2>
+<p class="section-sub">Tout ce qui précède se recompose en une seule image.</p>
+
+<div class="meta">
+<span class="lbl">🪄 Dernier passage sur le chantier</span>
+<p><strong>Spring Framework</strong>, c'est le constructeur de maisons préfabriquées : il fournit la structure porteuse — le conteneur IoC — et un catalogue d'options. Historiquement, il fallait remplir un long formulaire de configuration pour choisir chaque élément.</p>
+<p><strong>Spring Boot</strong>, c'est le même constructeur avec un catalogue « clés en main ». Vous cochez <em>maison familiale</em>, il livre chauffage, électricité et cuisine équipée, déjà branchés, aux emplacements standards. Vous restez libre de tout changer — mais si les emplacements standards vous conviennent, vous n'avez rien à faire.</p>
+</div>
+
+<div class="tw">
+<table>
+<thead><tr><th>Notion Spring Boot</th><th>Ce qu'elle signifie</th><th>Vu en section</th></tr></thead>
+<tbody>
+<tr><td><strong>Conteneur IoC</strong></td><td>Il fabrique vos objets et les branche entre eux</td><td>2.2 et 7.1</td></tr>
+<tr><td><strong>Convention plutôt que configuration</strong></td><td>Si vous suivez les usages, vous ne configurez rien</td><td>2.3</td></tr>
+<tr><td><strong>Auto-configuration</strong></td><td>Il détecte les bibliothèques présentes et se règle seul</td><td>2.2</td></tr>
+<tr><td><strong><em class="en">Starters</em></strong></td><td>Des lots de dépendances cohérentes, testées ensemble</td><td>2.3</td></tr>
+<tr><td><strong>Serveur embarqué</strong></td><td>Le serveur web est dans l'application : un seul fichier à lancer</td><td>6.2</td></tr>
+<tr><td><strong>Spring MVC</strong></td><td>Le module qui applique le patron MVC côté serveur</td><td>5.1</td></tr>
+<tr><td><strong>Spring Data JPA</strong></td><td>Le module qui pilote l'ORM et fabrique vos repositories</td><td>7.2</td></tr>
+<tr><td><strong>Spring Web / REST</strong></td><td>Le module qui expose vos contrôleurs sous forme d'API REST</td><td>8.3</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Et voici comment ces briques s'empilent :</p>
+
+<figure class="fig">
+<svg viewBox="0 0 720 228" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Composition de Spring Boot par-dessus Spring Framework">
+  <rect x="16" y="16" width="688" height="196" rx="8" class="bx-dash"/>
+  <text x="40" y="46" class="t-b">Spring Boot</text>
+  <text x="150" y="46" class="t-s">= Spring, préconfiguré et prêt à démarrer</text>
+
+  <rect x="40" y="66" width="200" height="54" rx="5" class="bx-a"/>
+  <text x="140" y="90" class="t-bs" text-anchor="middle">Auto-configuration</text>
+  <text x="140" y="108" class="t-s" text-anchor="middle">détecte et règle seul</text>
+
+  <rect x="250" y="66" width="200" height="54" rx="5" class="bx-a"/>
+  <text x="350" y="90" class="t-bs" text-anchor="middle">Starters</text>
+  <text x="350" y="108" class="t-s" text-anchor="middle">lots de dépendances</text>
+
+  <rect x="460" y="66" width="220" height="54" rx="5" class="bx-a"/>
+  <text x="570" y="90" class="t-bs" text-anchor="middle">Serveur embarqué</text>
+  <text x="570" y="108" class="t-s" text-anchor="middle">un seul fichier à lancer</text>
+
+  <path d="M140,120 L140,136" class="ar"/>
+  <path d="M350,120 L350,136" class="ar"/>
+  <path d="M570,120 L570,136" class="ar"/>
+
+  <rect x="40" y="140" width="640" height="54" rx="5" class="bx-g"/>
+  <text x="360" y="164" class="t-b" text-anchor="middle">Spring Framework</text>
+  <text x="360" y="184" class="t-s" text-anchor="middle">le conteneur IoC : il fabrique vos objets et les branche entre eux</text>
+</svg>
+<figcaption><b>Spring Boot n'est pas un concurrent de Spring.</b> C'est Spring, plus trois commodités qui suppriment la configuration manuelle. Le socle — le conteneur qui applique l'inversion de contrôle — est exactement le même.</figcaption>
+</figure>
+
+<div class="box key">
+<span class="lbl">🎯 La bonne nouvelle</span>
+<p>Vous connaissez déjà les deux extrémités de ce schéma : PostgreSQL en bas, les classes Java partout. Il ne vous reste qu'à apprendre les étiquettes qui relient le tout — et à savoir <strong>dans quelle boîte poser chaque ligne de code</strong>. C'était l'objet de cette séance.</p>
+</div>
+</section>
+
+<section id="s10">
+<h2>Ce qu'il faut retenir</h2>
+
+<div class="tw">
+<table>
+<thead><tr><th>Notion</th><th>En une phrase</th><th>🪄 L'image</th></tr></thead>
+<tbody>
+<tr><td><strong>Bibliothèque</strong></td><td>Vous l'appelez quand vous voulez</td><td>La boîte à outils</td></tr>
+<tr><td><strong>Framework</strong></td><td>C'est lui qui appelle votre code</td><td>La maison préfabriquée</td></tr>
+<tr><td><strong>Inversion de contrôle (IoC)</strong></td><td>Le contrôle du déroulement passe au framework</td><td>« Ne nous appelez pas, on vous appellera »</td></tr>
+<tr><td><strong>Injection de dépendances (DI)</strong></td><td>Une <em>technique</em> d'IoC : on vous fournit vos outils</td><td>La prise électrique</td></tr>
+<tr><td><strong>Séparation des responsabilités</strong></td><td>Une partie du code = un seul métier</td><td>Le serveur ne cuisine pas</td></tr>
+<tr><td><strong>Couplage / cohésion</strong></td><td>Couplage faible, cohésion forte</td><td>La guirlande / le tiroir à couverts</td></tr>
+<tr><td><strong>Architecture en couches</strong></td><td>Présentation → métier → persistance, sans saut</td><td>Salle → cuisine → réserve</td></tr>
+<tr><td><strong>Entité / DTO</strong></td><td>Le reflet de la table / ce qu'on accepte de montrer</td><td>Le carton en réserve / l'assiette dressée</td></tr>
+<tr><td><strong>MVC</strong></td><td>Le contrôleur fait le lien, la vue lit le modèle</td><td>Le serveur porte l'assiette</td></tr>
+<tr><td><strong>MVP</strong></td><td>Le présentateur dicte tout, la vue est passive</td><td>Le serveur dresse à table</td></tr>
+<tr><td><strong>MVVM</strong></td><td>La vue se lie au ViewModel, tout se rafraîchit seul</td><td>Le passe-plat automatique</td></tr>
+<tr><td><strong>Monolithe / microservices</strong></td><td>Un seul livrable / N livrables indépendants</td><td>Le grand magasin / la rue commerçante</td></tr>
+<tr><td><strong>Couche / tier</strong></td><td>Découpage du code / découpage des machines</td><td>Les rayons / les bâtiments</td></tr>
+<tr><td><strong>Hexagonale</strong></td><td>Le métier au centre, des adaptateurs autour</td><td>L'adaptateur de voyage</td></tr>
+<tr><td><strong>ORM</strong></td><td>Traduit les tables en objets et retour</td><td>L'interprète</td></tr>
+<tr><td><strong>API</strong></td><td>Le contrat qu'un logiciel offre à un autre</td><td>La carte du restaurant</td></tr>
+<tr><td><strong>CRUD</strong></td><td>Create, Read, Update, Delete : les quatre gestes de base</td><td>Les quatre verbes du bon de commande</td></tr>
+<tr><td><strong>Codes de statut</strong></td><td>2xx réussi · 4xx faute du client · 5xx faute du serveur</td><td>La réponse du guichet</td></tr>
+<tr><td><strong>REST</strong></td><td>Une adresse = une ressource, un verbe = une action, sans état</td><td>Le distributeur automatique</td></tr>
+<tr><td><strong>Spring Boot</strong></td><td>Spring, préconfiguré et prêt à démarrer</td><td>La maison clés en main</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section id="s11">
+<h2>Réflexes et pièges</h2>
+<p class="section-sub">Les dix confusions qui reviennent en évaluation et en entretien.</p>
+
+<div class="tw">
+<table>
+<thead><tr><th>&nbsp;</th><th>L'affirmation fausse</th><th>Ce qu'il faut répondre</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>« Un framework est une grosse bibliothèque »</td><td>Le critère est le sens de l'appel, pas la taille</td></tr>
+<tr><td>2</td><td>« IoC et injection de dépendances, c'est pareil »</td><td>L'IoC est le principe, la DI une technique parmi d'autres</td></tr>
+<tr><td>3</td><td>« MVC remplace l'architecture en couches »</td><td>MVC organise la présentation ; les couches organisent l'application. Les deux coexistent</td></tr>
+<tr><td>4</td><td>« Le M de MVC, c'est la base de données »</td><td>C'est le domaine : les données <em>et</em> les règles</td></tr>
+<tr><td>5</td><td>« MVVM, c'est pour le desktop »</td><td>Le vrai critère est la présence d'une liaison de données automatique</td></tr>
+<tr><td>6</td><td>« Une couche et un tier, c'est la même chose »</td><td>Logique contre physique. Trois couches peuvent tenir sur une machine</td></tr>
+<tr><td>7</td><td>« Les microservices, c'est mieux »</td><td>C'est un arbitrage organisationnel très coûteux à exploiter</td></tr>
+<tr><td>8</td><td>« Avec un ORM, plus besoin de SQL »</td><td>Il en faut davantage : voir le problème N+1</td></tr>
+<tr><td>9</td><td>« On peut renvoyer l'entité directement »</td><td>C'est la fuite de données classique. On passe par un DTO</td></tr>
+<tr><td>10</td><td>« <code>GET /supprimerClient?id=3</code> »</td><td>L'adresse nomme une ressource, le verbe dit l'action : <code>DELETE /clients/3</code></td></tr>
+<tr><td>11</td><td>« Une API, c'est forcément du web »</td><td>Les méthodes <code>public</code> d'une classe sont déjà son API</td></tr>
+<tr><td>12</td><td>« REST, c'est du JSON »</td><td>REST est un style, JSON un format. Les deux sont indépendants</td></tr>
+<tr><td>13</td><td>« <code>401</code> et <code>403</code>, c'est pareil »</td><td>401 : on ignore qui vous êtes. 403 : on le sait, et c'est non</td></tr>
+<tr><td>14</td><td>« <code>POST</code> et <code>PUT</code> font la même chose »</td><td><code>PUT</code> répété donne le même résultat, <code>POST</code> répété crée des doublons</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+<span class="lbl">🎯 Les trois phrases à savoir réciter</span>
+<p><strong>1.</strong> Une bibliothèque, je l'appelle ; un framework, il m'appelle.<br>
+<strong>2.</strong> Couplage faible, cohésion forte.<br>
+<strong>3.</strong> Chaque couche ne parle qu'à celle du dessous.</p>
+</div>
+
+<div class="box tip">
+<span class="lbl">💡 Avant la prochaine séance</span>
+<p>Reprenez un MCD que vous avez déjà produit et, sans écrire une ligne de code, dites à voix haute pour chacune de ses entités : quelle serait la table, quelle serait la classe entité, quel serait le DTO, et quelles règles métier iraient dans le service. Si vous savez faire cela, Spring Boot ne sera plus qu'une affaire de syntaxe.</p>
+</div>
+</section>
+
+<footer class="end">
+<p>Séance passerelle — Frameworks &amp; architectures logicielles · Formation Bac → Bac+3<br>
+Prochaine séance : premiers pas avec Spring Boot.</p>
+</footer>
+
+</main>
+</div>
+
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+  var sections = links.map(function (a) {
+    return document.querySelector(a.getAttribute('href'));
+  });
+  var toc = document.querySelector('.toc');
+
+  function surligner() {
+    var courant = 0;
+    for (var i = 0; i < sections.length; i++) {
+      if (sections[i] && sections[i].getBoundingClientRect().top <= 90) { courant = i; }
+    }
+    links.forEach(function (a, i) { a.classList.toggle('on', i === courant); });
+  }
+
+  var enAttente = false;
+  window.addEventListener('scroll', function () {
+    if (enAttente) { return; }
+    enAttente = true;
+    window.requestAnimationFrame(function () { surligner(); enAttente = false; });
+  }, { passive: true });
+
+  // Sur mobile, on referme le sommaire après un clic
+  links.forEach(function (a) {
+    a.addEventListener('click', function () {
+      if (window.innerWidth <= 960) { toc.removeAttribute('open'); }
+    });
+  });
+
+  var barre = document.getElementById('prog');
+  function progression() {
+    var h = document.documentElement;
+    var total = h.scrollHeight - h.clientHeight;
+    barre.style.width = (total > 0 ? (h.scrollTop / total) * 100 : 0) + '%';
+  }
+  window.addEventListener('scroll', progression, { passive: true });
+  window.addEventListener('resize', progression);
+
+  surligner();
+  progression();
+})();
+</script>
+</body>
+</html>
