@@ -1,0 +1,1756 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Premier CRUD avec Spring Boot — l'API REST de la bibliothèque</title>
+<style>
+:root{
+  /* Palette Spring */
+  --green:#6db33f;
+  --green-d:#4c8b2b;
+  --green-l:#eff7e8;
+  --ink:#34302d;
+  --ink-2:#1f1d1b;
+  --body:#4a4540;
+  --muted:#8a8480;
+  --line:#e5e2de;
+  --line-soft:#f0eeeb;
+  --bg:#ffffff;
+  --bg-alt:#f7f6f4;
+
+  --code-bg:#f7f6f4;
+  --kw:#7b3fa0;
+  --str:#4c8b2b;
+  --com:#9a948e;
+  --num:#b5761f;
+  --typ:#2c6e8f;
+  --fn:#34302d;
+
+  --warn-bg:#fdf6e7; --warn-line:#d99e2b; --warn-ink:#8a5f12;
+  --tip-bg:#edf4fa;  --tip-line:#3e7ca6;  --tip-ink:#235c80;
+  --recall-bg:#f4f0f8; --recall-line:#7b3fa0; --recall-ink:#5c2c78;
+  --key-bg:#eff7e8;  --key-line:#6db33f;  --key-ink:#3f7024;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+
+body{
+  margin:0;background:var(--bg);color:var(--body);
+  font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+  font-size:17px;line-height:1.68;-webkit-font-smoothing:antialiased;
+}
+body::before{content:"";display:block;height:5px;background:var(--green)}
+
+.layout{max-width:1180px;margin:0 auto;padding:0 26px 100px;display:flex;gap:60px;align-items:flex-start}
+
+/* ---------------- Sommaire ---------------- */
+.toc{position:sticky;top:0;width:256px;flex:0 0 256px;max-height:100vh;overflow-y:auto;padding:44px 0;font-size:14px}
+.toc summary{display:none}
+.toc-title{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink);font-weight:800;margin:0 0 4px;padding-bottom:12px;border-bottom:3px solid var(--green)}
+.toc ol{list-style:none;margin:8px 0 0;padding:0;counter-reset:toc}
+.toc li{counter-increment:toc}
+.toc a{display:flex;gap:11px;padding:7px 8px 7px 13px;color:var(--muted);text-decoration:none;border-left:3px solid transparent;line-height:1.35;transition:color .12s,background .12s}
+.toc a::before{content:counter(toc,decimal-leading-zero);color:#c3bdb7;font-variant-numeric:tabular-nums;font-size:11.5px;font-weight:800;padding-top:2px}
+.toc a:hover{color:var(--ink);background:var(--bg-alt)}
+.toc a.on{color:var(--green-d);border-left-color:var(--green);font-weight:700;background:var(--green-l)}
+.toc a.on::before{color:var(--green)}
+
+/* ---------------- Contenu ---------------- */
+.content{flex:1 1 auto;min-width:0;max-width:820px;padding:52px 0 0;counter-reset:section fig}
+
+header.masthead{margin-bottom:48px}
+.badge{display:inline-block;background:var(--green);color:#fff;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:800;padding:6px 12px;border-radius:3px;margin-bottom:22px}
+.eyebrow{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0 0 18px}
+h1{font-size:50px;line-height:1.04;letter-spacing:-.035em;color:var(--ink);font-weight:800;margin:0 0 18px}
+h1 .thin{display:block;font-weight:300;color:var(--green);letter-spacing:-.03em}
+.lede{font-size:19.5px;color:var(--muted);margin:0 0 34px;max-width:58ch;padding-bottom:30px;border-bottom:1px solid var(--line)}
+
+.panel{background:var(--bg-alt);border:1px solid var(--line);border-left:4px solid var(--green);border-radius:0 5px 5px 0;padding:22px 26px;margin:0 0 18px}
+.panel-title{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink);font-weight:800;margin:0 0 14px}
+.panel ol,.panel ul{margin:0;padding-left:20px}
+.panel li{margin:6px 0}
+.panel li::marker{color:var(--green);font-weight:800}
+.panel .note{margin:14px 0 0;font-size:15px;color:var(--muted)}
+
+h2{counter-increment:section;counter-reset:sub;position:relative;font-size:33px;line-height:1.12;letter-spacing:-.03em;color:var(--ink);font-weight:800;margin:86px 0 10px;padding-top:42px;border-top:1px solid var(--line);scroll-margin-top:16px}
+h2::before{content:"Section " counter(section,decimal-leading-zero);position:absolute;top:0;left:0;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;font-weight:800;color:#fff;background:var(--green);padding:5px 10px;border-radius:0 0 3px 3px}
+.section-sub{margin:0 0 32px;color:var(--muted);font-size:17.5px;max-width:56ch}
+h3{counter-increment:sub;font-size:22px;color:var(--ink);font-weight:800;letter-spacing:-.015em;margin:50px 0 14px;scroll-margin-top:16px}
+h3::before{content:counter(section) "." counter(sub);color:var(--green);font-weight:800;margin-right:11px;font-variant-numeric:tabular-nums}
+h4{font-size:16.5px;color:var(--ink);font-weight:800;margin:30px 0 8px}
+
+p{margin:0 0 16px}
+.content ul,.content ol{margin:0 0 16px;padding-left:24px}
+.content li{margin:6px 0}
+.content li::marker{color:var(--muted)}
+strong{color:var(--ink);font-weight:700}
+em.en{color:var(--muted);font-style:italic}
+a{color:var(--green-d)}
+
+/* ---------------- Encadrés ---------------- */
+.box{border-left:4px solid;border-radius:0 5px 5px 0;padding:17px 22px;margin:28px 0;font-size:16px}
+.box p:last-child{margin-bottom:0}
+.box .lbl{display:block;font-weight:800;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px}
+.warn{background:var(--warn-bg);border-color:var(--warn-line)}   .warn .lbl{color:var(--warn-ink)}
+.tip{background:var(--tip-bg);border-color:var(--tip-line)}      .tip .lbl{color:var(--tip-ink)}
+.recall{background:var(--recall-bg);border-color:var(--recall-line)} .recall .lbl{color:var(--recall-ink)}
+.key{background:var(--key-bg);border-color:var(--key-line)}      .key .lbl{color:var(--key-ink)}
+
+/* Encadré métaphore */
+.meta{position:relative;background:#fff;border:1px solid var(--line);border-top:4px solid var(--ink);border-radius:2px 2px 5px 5px;padding:22px 26px 22px 64px;margin:28px 0}
+.meta::before{content:"🪄";position:absolute;left:22px;top:24px;font-size:20px;line-height:1}
+.meta .lbl{display:block;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink);font-weight:800;margin-bottom:10px}
+.meta p{margin-bottom:10px}
+.meta p:last-child{margin-bottom:0}
+
+/* ---------------- Code ---------------- */
+pre{position:relative;background:var(--code-bg);border:1px solid var(--line);border-radius:5px;padding:34px 18px 16px;overflow-x:auto;margin:22px 0;font-size:14.5px;line-height:1.62}
+pre[data-lang]::before{
+  content:attr(data-lang);position:absolute;top:0;left:0;
+  background:var(--ink);color:#fff;font-family:"Inter",system-ui,sans-serif;
+  font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:800;
+  padding:4px 11px;border-radius:4px 0 4px 0;
+}
+code,pre{font-family:"SFMono-Regular",Menlo,Consolas,"Liberation Mono",monospace}
+p code,li code,td code,th code{background:var(--code-bg);border:1px solid var(--line);border-radius:3px;padding:1px 5px;font-size:.87em;color:var(--ink)}
+.k{color:var(--kw);font-weight:600} .s{color:var(--str)} .c{color:var(--com);font-style:italic}
+.n{color:var(--num)} .t{color:var(--typ)} .f{color:var(--fn);font-weight:600}
+.code-cap{font-size:13px;color:var(--muted);margin:-14px 0 22px;padding-left:13px;border-left:3px solid var(--line)}
+
+/* ---------------- Figures ---------------- */
+figure{counter-increment:fig;margin:32px 0}
+.fig-scroll{overflow-x:auto;background:#fff;border:1px solid var(--line);border-radius:5px;padding:24px 22px}
+figure svg{display:block;width:100%;min-width:560px;height:auto}
+figcaption{margin-top:13px;padding-left:13px;border-left:3px solid var(--green);font-size:13.5px;color:var(--muted)}
+figcaption::before{content:"Figure " counter(fig) " — ";color:var(--green-d);font-weight:800}
+
+svg text{font-family:"Inter",system-ui,-apple-system,sans-serif;fill:#4a4540}
+svg .t-ttl{font-size:13px;font-weight:800;fill:#34302d}
+svg .t-bd{font-size:12px}
+svg .t-sm{font-size:10.5px;fill:#8a8480}
+svg .t-mono{font-family:"SFMono-Regular",Menlo,Consolas,monospace;font-size:11.5px}
+svg .t-tag{font-size:9.5px;font-weight:800;letter-spacing:.14em;fill:#8a8480}
+svg .bx{fill:#fff;stroke:#dad6d1;stroke-width:1.4}
+svg .bx-a{fill:#eff7e8;stroke:#9ccc6e;stroke-width:1.4}
+svg .bx-o{fill:#fdf6e7;stroke:#e0b872;stroke-width:1.4}
+svg .bx-g{fill:#eef3f6;stroke:#a4bccb;stroke-width:1.4}
+svg .bx-d{fill:#34302d;stroke:none}
+svg .ln{stroke:#b5b0aa;stroke-width:1.5;fill:none}
+svg .ln-a{stroke:#4c8b2b;stroke-width:1.8;fill:none}
+svg .ln-dash{stroke:#b5b0aa;stroke-width:1.4;fill:none;stroke-dasharray:5 4}
+
+/* ---------------- Tableaux ---------------- */
+.tw{overflow-x:auto;margin:24px 0;border:1px solid var(--line);border-radius:5px}
+table{border-collapse:collapse;width:100%;font-size:15px;background:#fff}
+th,td{border-bottom:1px solid var(--line);border-right:1px solid var(--line);padding:11px 14px;text-align:left;vertical-align:top}
+tr td:last-child,tr th:last-child{border-right:0}
+tbody tr:last-child td,tbody tr:last-child th{border-bottom:0}
+thead th{background:var(--green-l);color:var(--ink);font-weight:800;font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;border-bottom:2px solid var(--green)}
+tbody th{background:var(--bg-alt);font-weight:700;color:var(--ink)}
+tbody tr:nth-child(even) td{background:#fcfbfa}
+
+footer.end{margin-top:88px;padding-top:24px;border-top:4px solid var(--green);font-size:14px;color:var(--muted)}
+
+/* ---------------- Responsive ---------------- */
+@media (max-width:980px){
+  body{font-size:16px}
+  .layout{flex-direction:column;gap:0;padding:0 18px 68px}
+  .toc{position:static;width:100%;flex:none;max-height:none;padding:18px 0 0;border-bottom:1px solid var(--line);margin-bottom:6px}
+  .toc summary{display:block;cursor:pointer;list-style:none;font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:800;color:var(--ink);padding:10px 0}
+  .toc summary::-webkit-details-marker{display:none}
+  .toc summary::after{content:" ▾";color:var(--green)}
+  .toc[open] summary::after{content:" ▴"}
+  .toc-title{display:none}
+  .content{padding-top:24px;max-width:100%}
+  h1{font-size:35px} h2{font-size:25px;margin-top:60px} h3{font-size:19px}
+  pre{font-size:13px}
+  .fig-scroll{padding:16px 14px}
+  .fig-scroll::before{content:"↔ faites glisser";display:block;font-size:11px;color:var(--muted);margin-bottom:8px;letter-spacing:.06em}
+  .meta{padding:20px 18px 20px 56px}
+}
+@media print{
+  body::before{display:none}
+  .toc{display:none} .layout{display:block;max-width:100%} body{background:#fff;font-size:11pt}
+  h2{page-break-after:avoid} pre,table,.box,.meta,figure{page-break-inside:avoid}
+  figure svg{min-width:0}
+}
+
+</style>
+</head>
+<body>
+<div class="layout">
+
+<details class="toc" open>
+<summary>Sommaire</summary>
+<p class="toc-title">Sommaire</p>
+<nav>
+<ol>
+  <li><a href="#s1">Ce qu'on va construire</a></li>
+  <li><a href="#s2">Le domaine : la bibliothèque</a></li>
+  <li><a href="#s3">Spring Initializr</a></li>
+  <li><a href="#s4">Le projet généré et le pom.xml</a></li>
+  <li><a href="#s5">Les entités</a></li>
+  <li><a href="#s6">Le repository</a></li>
+  <li><a href="#s7">Le service</a></li>
+  <li><a href="#s8">Les DTO</a></li>
+  <li><a href="#s9">Le contrôleur REST</a></li>
+  <li><a href="#s10">La gestion des erreurs</a></li>
+  <li><a href="#s11">Tester l'API</a></li>
+  <li><a href="#s12">Récapitulatif</a></li>
+  <li><a href="#s13">À vous de jouer</a></li>
+  <li><a href="#s14">Les pièges du premier CRUD</a></li>
+</ol>
+</nav>
+</details>
+
+<main class="content">
+
+<header class="masthead">
+  <p class="badge">TP guidé · Spring Boot 4.1</p>
+  <p class="eyebrow">Formation Bac → Bac+3 · Développement d'applications</p>
+  <h1>Premier CRUD<span class="thin">L'API REST de la bibliothèque</span></h1>
+  <p class="lede">Du formulaire Spring Initializr jusqu'à la première requête qui renvoie du JSON. Chaque ligne de code est expliquée.</p>
+
+  <div class="panel">
+    <p class="panel-title">Au programme aujourd'hui</p>
+    <ol>
+      <li>Générer un projet avec Spring Initializr : quels champs, quelles dépendances</li>
+      <li>Comprendre le <code>pom.xml</code> et le rôle de Maven</li>
+      <li>Écrire les <strong>entités</strong> JPA à partir du MCD de la bibliothèque</li>
+      <li>Écrire le <strong>repository</strong>, puis le <strong>service</strong>, puis les <strong>DTO</strong>, puis le <strong>contrôleur</strong></li>
+      <li>Gérer proprement les erreurs : 404, 409, 400</li>
+      <li>Tester les cinq opérations CRUD de bout en bout</li>
+    </ol>
+  </div>
+
+  <div class="panel">
+    <p class="panel-title">Prérequis</p>
+    <ul>
+      <li><strong>Séance passerelle</strong> — framework, couches, API REST, verbes HTTP, ORM, injection de dépendances</li>
+      <li><strong>Modélisation</strong> — savoir lire un MCD et le traduire en tables</li>
+      <li><strong>PostgreSQL</strong> — une base accessible en local, et savoir créer une base</li>
+      <li><strong>Java</strong> — classes, interfaces, constructeurs, généricité (<code>List&lt;T&gt;</code>)</li>
+    </ul>
+    <p class="note">Outils : JDK 21 ou 25, un IDE (IntelliJ IDEA ou VS Code), PostgreSQL 16 ou plus, et un navigateur.</p>
+  </div>
+</header>
+
+<section id="s1">
+<h2>Ce qu'on va construire</h2>
+<p class="section-sub">Une API REST complète pour gérer le catalogue de livres d'une bibliothèque.</p>
+
+<p>À la fin de ce TP, votre application répondra à cinq requêtes HTTP. Les voici, dans l'ordre où nous les ferons fonctionner :</p>
+
+<div class="tw">
+<table>
+<thead><tr><th>Verbe</th><th>Adresse</th><th>Ce que ça fait</th><th>Réponse</th></tr></thead>
+<tbody>
+<tr><td><code>GET</code></td><td><code>/api/v1/livres</code></td><td>Lister tous les livres</td><td><code>200</code> + tableau JSON</td></tr>
+<tr><td><code>GET</code></td><td><code>/api/v1/livres/1</code></td><td>Lire un livre précis</td><td><code>200</code> ou <code>404</code></td></tr>
+<tr><td><code>POST</code></td><td><code>/api/v1/livres</code></td><td>Ajouter un livre</td><td><code>201</code>, <code>400</code> ou <code>409</code></td></tr>
+<tr><td><code>PUT</code></td><td><code>/api/v1/livres/1</code></td><td>Modifier un livre</td><td><code>200</code> ou <code>404</code></td></tr>
+<tr><td><code>DELETE</code></td><td><code>/api/v1/livres/1</code></td><td>Supprimer un livre</td><td><code>204</code> ou <code>404</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box recall">
+<span class="lbl">📝 Rappel de la séance passerelle</span>
+<p>Le restaurant devient une bibliothèque : mêmes rôles, autre décor. Le <strong>contrôleur</strong> est le guichet, le <strong>service</strong> est le bibliothécaire qui connaît le règlement, le <strong>repository</strong> est le magasinier qui va chercher les ouvrages en réserve. Et le client n'entre jamais dans la réserve.</p>
+</div>
+
+<h3>Dans quel ordre construire — et pourquoi</h3>
+
+<p>Nous allons construire de <strong>bas en haut</strong> : d'abord la donnée, ensuite ce qui la range, puis ce qui décide, enfin ce qui expose. Ce n'est pas un caprice : c'est l'ordre dans lequel le code <em>compile</em>. Un service ne peut pas être écrit avant le repository dont il dépend.</p>
+
+<figure>
+<div class="fig-scroll">
+<svg viewBox="0 0 800 400" role="img" aria-labelledby="fa1">
+<title id="fa1">L'ordre de construction des cinq couches de code du TP</title>
+<defs><marker id="b1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#4c8b2b"/></marker></defs>
+
+<text class="t-tag" x="228" y="20" text-anchor="end">ÉTAPE</text>
+<text class="t-tag" x="572" y="20">CE QU'ELLE APPORTE</text>
+
+<rect class="bx-g" x="240" y="30" width="320" height="56" rx="5"/>
+<text class="t-ttl" x="400" y="54" text-anchor="middle">1 · Entité</text>
+<text class="t-mono" x="400" y="74" text-anchor="middle">Livre.java</text>
+<text class="t-bd" x="228" y="63" text-anchor="end">§5</text>
+<text class="t-sm" x="572" y="57">la forme de la donnée,</text>
+<text class="t-sm" x="572" y="73">calquée sur la table</text>
+
+<line class="ln-a" x1="400" y1="88" x2="400" y2="108" marker-end="url(#b1)"/>
+
+<rect class="bx-g" x="240" y="110" width="320" height="56" rx="5"/>
+<text class="t-ttl" x="400" y="134" text-anchor="middle">2 · Repository</text>
+<text class="t-mono" x="400" y="154" text-anchor="middle">LivreRepository.java</text>
+<text class="t-bd" x="228" y="143" text-anchor="end">§6</text>
+<text class="t-sm" x="572" y="137">lire et écrire en base,</text>
+<text class="t-sm" x="572" y="153">sans aucune décision</text>
+
+<line class="ln-a" x1="400" y1="168" x2="400" y2="188" marker-end="url(#b1)"/>
+
+<rect class="bx-o" x="240" y="190" width="320" height="56" rx="5"/>
+<text class="t-ttl" x="400" y="214" text-anchor="middle">3 · Service</text>
+<text class="t-mono" x="400" y="234" text-anchor="middle">LivreService.java</text>
+<text class="t-bd" x="228" y="223" text-anchor="end">§7</text>
+<text class="t-sm" x="572" y="217">les règles métier :</text>
+<text class="t-sm" x="572" y="233">ISBN unique, livre absent</text>
+
+<line class="ln-a" x1="400" y1="248" x2="400" y2="268" marker-end="url(#b1)"/>
+
+<rect class="bx-a" x="240" y="270" width="320" height="56" rx="5"/>
+<text class="t-ttl" x="400" y="294" text-anchor="middle">4 · DTO</text>
+<text class="t-mono" x="400" y="314" text-anchor="middle">LivreReponse.java</text>
+<text class="t-bd" x="228" y="303" text-anchor="end">§8</text>
+<text class="t-sm" x="572" y="297">ce qu'on accepte</text>
+<text class="t-sm" x="572" y="313">de montrer dehors</text>
+
+<line class="ln-a" x1="400" y1="328" x2="400" y2="348" marker-end="url(#b1)"/>
+
+<rect class="bx-a" x="240" y="350" width="320" height="42" rx="5"/>
+<text class="t-ttl" x="400" y="368" text-anchor="middle">5 · Contrôleur</text>
+<text class="t-mono" x="400" y="385" text-anchor="middle">LivreController.java</text>
+<text class="t-bd" x="228" y="376" text-anchor="end">§9</text>
+<text class="t-sm" x="572" y="369">les cinq adresses HTTP</text>
+<text class="t-sm" x="572" y="385">de l'API</text>
+</svg>
+</div>
+<figcaption>Chaque étage a besoin de celui du dessus pour compiler. On construit donc dans cet ordre, et on teste à la toute fin.</figcaption>
+</figure>
+
+<div class="box tip">
+<span class="lbl">💡 Vous n'aurez rien à l'écran avant la §11</span>
+<p>C'est normal et c'est déstabilisant la première fois. Pendant quatre étapes, vous écrivez du code sans rien voir. Tenez bon : à l'étape 5, tout s'allume d'un coup. Les fois suivantes, vous irez trois fois plus vite.</p>
+</div>
+</section>
+
+<section id="s2">
+<h2>Le domaine : la bibliothèque</h2>
+<p class="section-sub">Le MCD que vous connaissez, sa traduction en tables, et ce qu'on implémente aujourd'hui.</p>
+
+<h3>Le MCD</h3>
+
+<figure>
+<div class="fig-scroll">
+<svg viewBox="0 0 800 466" role="img" aria-labelledby="fa2">
+<title id="fa2">Modèle conceptuel de données d'une bibliothèque : catégorie, livre, auteur, adhérent</title>
+
+<rect class="bx" x="20" y="188" width="150" height="94" rx="4"/>
+<rect x="20" y="188" width="150" height="24" rx="4" fill="#34302d"/>
+<text class="t-ttl" x="95" y="205" text-anchor="middle" fill="#ffffff">CATEGORIE</text>
+<text class="t-mono" x="32" y="231" text-decoration="underline">id_categorie</text>
+<text class="t-mono" x="32" y="250">libelle</text>
+
+<rect class="bx-o" x="188" y="212" width="112" height="46" rx="23"/>
+<text class="t-bd" x="244" y="240" text-anchor="middle">APPARTENIR</text>
+
+<rect class="bx-a" x="318" y="164" width="180" height="142" rx="4"/>
+<rect x="318" y="164" width="180" height="24" rx="4" fill="#34302d"/>
+<text class="t-ttl" x="408" y="181" text-anchor="middle" fill="#ffffff">LIVRE</text>
+<text class="t-mono" x="330" y="207" text-decoration="underline">id_livre</text>
+<text class="t-mono" x="330" y="226">titre</text>
+<text class="t-mono" x="330" y="245">isbn</text>
+<text class="t-mono" x="330" y="264">annee_publication</text>
+<text class="t-mono" x="330" y="283">nb_pages</text>
+
+<rect class="bx-o" x="516" y="212" width="96" height="46" rx="23"/>
+<text class="t-bd" x="564" y="240" text-anchor="middle">ECRIRE</text>
+
+<rect class="bx" x="630" y="188" width="150" height="94" rx="4"/>
+<rect x="630" y="188" width="150" height="24" rx="4" fill="#34302d"/>
+<text class="t-ttl" x="705" y="205" text-anchor="middle" fill="#ffffff">AUTEUR</text>
+<text class="t-mono" x="642" y="231" text-decoration="underline">id_auteur</text>
+<text class="t-mono" x="642" y="250">nom</text>
+<text class="t-mono" x="642" y="269">prenom</text>
+
+<rect class="bx-o" x="340" y="336" width="136" height="46" rx="23"/>
+<text class="t-bd" x="408" y="358" text-anchor="middle">EMPRUNTER</text>
+<text class="t-sm" x="490" y="352">date_emprunt</text>
+<text class="t-sm" x="490" y="368">date_retour</text>
+
+<rect class="bx" x="318" y="404" width="180" height="52" rx="4"/>
+<rect x="318" y="404" width="180" height="24" rx="4" fill="#34302d"/>
+<text class="t-ttl" x="408" y="421" text-anchor="middle" fill="#ffffff">ADHERENT</text>
+<text class="t-mono" x="330" y="447" text-decoration="underline">id_adherent</text>
+
+<line class="ln" x1="170" y1="235" x2="188" y2="235"/>
+<text class="t-sm" x="179" y="228" text-anchor="middle">0,n</text>
+<line class="ln" x1="300" y1="235" x2="318" y2="235"/>
+<text class="t-sm" x="309" y="228" text-anchor="middle">1,1</text>
+<line class="ln" x1="498" y1="235" x2="516" y2="235"/>
+<text class="t-sm" x="507" y="228" text-anchor="middle">1,n</text>
+<line class="ln" x1="612" y1="235" x2="630" y2="235"/>
+<text class="t-sm" x="621" y="228" text-anchor="middle">1,n</text>
+<line class="ln" x1="408" y1="306" x2="408" y2="336"/>
+<text class="t-sm" x="418" y="325">0,n</text>
+<line class="ln" x1="408" y1="382" x2="408" y2="404"/>
+<text class="t-sm" x="418" y="398">0,n</text>
+
+<text class="t-sm" x="20" y="26">Les identifiants sont soulignés. Les ovales sont les associations, avec leurs cardinalités.</text>
+<text class="t-sm" x="20" y="46">Aujourd'hui : tout ce qui touche au LIVRE. ADHERENT et EMPRUNTER sont votre exercice (§13).</text>
+</svg>
+</div>
+<figcaption>Le MCD classique d'une bibliothèque. Trois associations : une hiérarchie simple, une association porteuse de rien, une association porteuse de dates.</figcaption>
+</figure>
+
+<h3>Le MLD, puis le MPD</h3>
+
+<div class="box recall">
+<span class="lbl">📝 La règle que vous avez apprise</span>
+<p>Une association <strong>(1,1) — (0,n)</strong> se traduit par une <strong>clé étrangère</strong> du côté du 1,1. Une association <strong>(1,n) — (1,n)</strong> se traduit par une <strong>table de jointure</strong> supplémentaire. Une association <strong>porteuse d'attributs</strong> devient toujours une table.</p>
+</div>
+
+<pre data-lang="MLD"><span class="c">-- MLD, en écriture textuelle</span>
+categorie (<span class="s">id_categorie</span>, libelle)
+auteur    (<span class="s">id_auteur</span>, nom, prenom)
+livre     (<span class="s">id_livre</span>, titre, isbn, annee_publication, nb_pages, <span class="k">#id_categorie</span>)
+ecrire    (<span class="k">#id_livre</span>, <span class="k">#id_auteur</span>)
+adherent  (<span class="s">id_adherent</span>, nom, prenom, email, date_inscription)
+emprunt   (<span class="s">id_emprunt</span>, date_emprunt, date_retour, <span class="k">#id_livre</span>, <span class="k">#id_adherent</span>)</pre>
+
+<p>Et le MPD, c'est-à-dire le SQL réellement exécuté par PostgreSQL :</p>
+
+<pre data-lang="SQL"><span class="c">-- Créez d'abord la base, dans psql ou pgAdmin</span>
+<span class="k">CREATE DATABASE</span> bibliotheque;
+
+<span class="c">-- Puis, dans cette base :</span>
+<span class="k">CREATE TABLE</span> categorie (
+    id_categorie  <span class="t">BIGSERIAL</span> <span class="k">PRIMARY KEY</span>,
+    libelle       <span class="t">VARCHAR</span>(<span class="n">50</span>) <span class="k">NOT NULL</span> <span class="k">UNIQUE</span>
+);
+
+<span class="k">CREATE TABLE</span> auteur (
+    id_auteur     <span class="t">BIGSERIAL</span> <span class="k">PRIMARY KEY</span>,
+    nom           <span class="t">VARCHAR</span>(<span class="n">60</span>) <span class="k">NOT NULL</span>,
+    prenom        <span class="t">VARCHAR</span>(<span class="n">60</span>)
+);
+
+<span class="k">CREATE TABLE</span> livre (
+    id_livre          <span class="t">BIGSERIAL</span> <span class="k">PRIMARY KEY</span>,
+    titre             <span class="t">VARCHAR</span>(<span class="n">200</span>) <span class="k">NOT NULL</span>,
+    isbn              <span class="t">VARCHAR</span>(<span class="n">13</span>)  <span class="k">NOT NULL</span> <span class="k">UNIQUE</span>,
+    annee_publication <span class="t">INTEGER</span>,
+    nb_pages          <span class="t">INTEGER</span>,
+    id_categorie      <span class="t">BIGINT</span> <span class="k">NOT NULL</span>
+        <span class="k">REFERENCES</span> categorie(id_categorie)     <span class="c">-- la clé étrangère</span>
+);
+
+<span class="k">CREATE TABLE</span> ecrire (                          <span class="c">-- la table de jointure</span>
+    id_livre   <span class="t">BIGINT</span> <span class="k">REFERENCES</span> livre(id_livre),
+    id_auteur  <span class="t">BIGINT</span> <span class="k">REFERENCES</span> auteur(id_auteur),
+    <span class="k">PRIMARY KEY</span> (id_livre, id_auteur)            <span class="c">-- clé primaire composée</span>
+);</pre>
+
+<div class="box tip">
+<span class="lbl">💡 Vous pourriez ne pas écrire ce SQL du tout</span>
+<p>Hibernate sait générer ces tables tout seul à partir de vos entités Java — nous le configurerons en §4. Écrivez-les quand même : vous verrez ainsi que la table générée correspond bien à ce que vous aviez modélisé, et vous saurez repérer le jour où ce n'est pas le cas.</p>
+</div>
+</section>
+
+<section id="s3">
+<h2>Spring Initializr</h2>
+<p class="section-sub">Le générateur officiel de projets Spring Boot. Trois minutes, et le squelette est prêt.</p>
+
+<div class="meta">
+<span class="lbl">Le configurateur de voiture</span>
+<p>Sur le site d'un constructeur, vous ne dessinez pas votre voiture : vous cochez des options dans un formulaire. Motorisation, finition, couleur, options. Vous cliquez, et l'usine assemble une voiture complète, roulante, cohérente.</p>
+<p>Spring Initializr est ce configurateur. Vous cochez « base de données PostgreSQL » et « API web », il vous livre un projet qui démarre.</p>
+</div>
+
+<p>Rendez-vous sur <strong>start.spring.io</strong>. La plupart des IDE proposent le même formulaire intégré — dans IntelliJ IDEA : <em>File → New → Project → Spring Boot</em>.</p>
+
+<h3>Remplir le formulaire</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th>Champ</th><th>Ce qu'on choisit</th><th>Pourquoi</th></tr></thead>
+<tbody>
+<tr><td><strong>Project</strong></td><td><code>Maven</code></td><td>L'outil de construction. Gradle fait la même chose autrement ; Maven est plus répandu en formation et en entreprise française</td></tr>
+<tr><td><strong>Language</strong></td><td><code>Java</code></td><td>&nbsp;</td></tr>
+<tr><td><strong>Spring Boot</strong></td><td>La dernière <code>4.1.x</code> sans mention <em>SNAPSHOT</em> ni <em>M</em></td><td><em>SNAPSHOT</em> = version de développement instable, <em>M</em> = <em>milestone</em>, pas encore finalisée. On prend toujours la version stable</td></tr>
+<tr><td><strong>Group</strong></td><td><code>fr.bibliotheque</code></td><td>Votre organisation, à l'envers, comme un nom de domaine. Cela deviendra le début du nom des paquets</td></tr>
+<tr><td><strong>Artifact</strong></td><td><code>api</code></td><td>Le nom du module. Donnera le nom du fichier <code>.jar</code> produit</td></tr>
+<tr><td><strong>Name</strong></td><td><code>api</code></td><td>Rempli automatiquement depuis <em>Artifact</em></td></tr>
+<tr><td><strong>Package name</strong></td><td><code>fr.bibliotheque.api</code></td><td>Group + Artifact. C'est le paquet racine : tout votre code ira dedans</td></tr>
+<tr><td><strong>Packaging</strong></td><td><code>Jar</code></td><td>Un fichier exécutable autonome avec son serveur web intégré. <code>War</code> ne sert que pour déployer dans un serveur externe déjà en place</td></tr>
+<tr><td><strong>Java</strong></td><td><code>21</code> ou <code>25</code></td><td>Deux versions à support long terme. Spring Boot 4 exige Java 17 au minimum</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box warn">
+<span class="lbl">⚠️ Le nom du paquet racine n'est pas décoratif</span>
+<p>Spring Boot ne cherche vos classes que <strong>dans le paquet de la classe principale et ses sous-paquets</strong>. Si vous créez plus tard un contrôleur dans <code>fr.autrechose.web</code>, Spring ne le verra jamais et votre adresse renverra <code>404</code> sans le moindre message d'erreur. Rangez toujours votre code sous <code>fr.bibliotheque.api</code>.</p>
+</div>
+
+<h3>Les dépendances à cocher</h3>
+
+<p>Cliquez sur <strong>ADD DEPENDENCIES</strong> et ajoutez les cinq suivantes :</p>
+
+<div class="tw">
+<table>
+<thead><tr><th>Dépendance</th><th>À quoi elle sert</th><th>Sans elle</th></tr></thead>
+<tbody>
+<tr><td><strong>Spring Web</strong></td><td>Le serveur web Tomcat intégré, les annotations <code>@RestController</code>, <code>@GetMapping</code>, et la conversion automatique en JSON</td><td>Aucune adresse HTTP, pas de serveur : l'application démarre et s'arrête aussitôt</td></tr>
+<tr><td><strong>Spring Data JPA</strong></td><td>L'ORM Hibernate, les entités, les repositories, la gestion des transactions</td><td>Il faudrait écrire le SQL et le JDBC à la main</td></tr>
+<tr><td><strong>PostgreSQL Driver</strong></td><td>Le pilote qui sait dialoguer avec PostgreSQL</td><td>« Driver class not found » au démarrage</td></tr>
+<tr><td><strong>Validation</strong></td><td>Les annotations <code>@NotBlank</code>, <code>@Size</code>, <code>@Pattern</code> pour contrôler les données reçues</td><td>Vous écririez vos <code>if</code> de contrôle à la main dans chaque contrôleur</td></tr>
+<tr><td><strong>Spring Boot DevTools</strong></td><td>Confort : redémarre l'application dès que vous enregistrez un fichier</td><td>Il faut relancer l'application manuellement à chaque modification</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box warn">
+<span class="lbl">⚠️ Ce qui a changé avec Spring Boot 4</span>
+<p>Vous cochez toujours <strong>Spring Web</strong> dans le formulaire, mais dans le <code>pom.xml</code> généré la dépendance s'appelle désormais <code>spring-boot-starter-<strong>webmvc</strong></code>, et non plus <code>spring-boot-starter-web</code>. Le renommage sert à la distinguer de <code>webflux</code>, l'autre modèle de programmation web de Spring.</p>
+<p>Conséquence pratique : <strong>tous les tutoriels écrits avant fin 2025 affichent l'ancien nom.</strong> Ce n'est pas une erreur de leur part, c'est une version antérieure. L'ancien nom fonctionne encore, mais il est déprécié.</p>
+</div>
+
+<div class="box tip">
+<span class="lbl">💡 Lombok : pas aujourd'hui</span>
+<p>Vous verrez partout la dépendance <strong>Lombok</strong>, qui génère les <em>getters</em>, <em>setters</em> et constructeurs à votre place. Elle est très utilisée. Nous ne la prenons pas pour ce premier TP : vous devez d'abord voir le code réel que Spring manipule. Vous l'ajouterez au TP suivant, en sachant ce qu'elle vous épargne.</p>
+</div>
+
+<p>Cliquez sur <strong>GENERATE</strong> : un fichier <code>api.zip</code> se télécharge. Décompressez-le et ouvrez le dossier dans votre IDE. À l'ouverture, l'IDE télécharge automatiquement les bibliothèques — comptez une à deux minutes la première fois.</p>
+</section>
+
+<section id="s4">
+<h2>Le projet généré et le pom.xml</h2>
+<p class="section-sub">Ce que contient le squelette, et à quoi sert chaque fichier.</p>
+
+<h3>L'arborescence</h3>
+
+<pre data-lang="Arborescence"><span class="c"># Ce que Spring Initializr vous a livré</span>
+api/
+├── pom.xml                      <span class="c"># fiche d'identité + liste des dépendances</span>
+├── mvnw  /  mvnw.cmd            <span class="c"># Maven embarqué : pas besoin de l'installer</span>
+└── src/
+    ├── main/
+    │   ├── java/fr/bibliotheque/api/
+    │   │   └── ApiApplication.java      <span class="c"># le point de démarrage</span>
+    │   └── resources/
+    │       ├── application.properties   <span class="c"># la configuration</span>
+    │       ├── static/                  <span class="c"># fichiers web (vide pour nous)</span>
+    │       └── templates/               <span class="c"># pages HTML (vide pour nous)</span>
+    └── test/
+        └── java/fr/bibliotheque/api/
+            └── ApiApplicationTests.java <span class="c"># un test qui vérifie que ça démarre</span></pre>
+
+<p>Quatre fichiers seulement. Tout le reste, c'est vous qui allez l'écrire.</p>
+
+<h3>Le pom.xml</h3>
+
+<div class="meta">
+<span class="lbl">La fiche d'identité et la liste de courses</span>
+<p>Le <code>pom.xml</code> fait deux choses, et deux seulement.</p>
+<p>C'est d'abord la <strong>carte d'identité</strong> du projet : son nom, sa version, la version de Java à utiliser. C'est ensuite la <strong>liste de courses</strong> : les bibliothèques dont votre code a besoin.</p>
+<p><strong>Maven</strong> est le livreur. Il lit la liste, va chercher chaque paquet sur un entrepôt public appelé <em>Maven Central</em>, le range dans un placard local (le dossier <code>.m2</code> de votre compte), et le met à disposition de votre code. Vous n'installez jamais rien à la main.</p>
+</div>
+
+<p>« POM » signifie <em class="en">Project Object Model</em> — le modèle du projet. Voici le fichier généré, allégé de quelques balises de confort :</p>
+
+<pre data-lang="pom.xml"><span class="c">&lt;!-- 1. En-tête : c'est un fichier Maven, version 4 du format --&gt;</span>
+&lt;<span class="t">project</span> <span class="k">xmlns</span>=<span class="s">"http://maven.apache.org/POM/4.0.0"</span>&gt;
+    &lt;<span class="t">modelVersion</span>&gt;4.0.0&lt;/<span class="t">modelVersion</span>&gt;
+
+    <span class="c">&lt;!-- 2. LE PARENT : l'héritage qui fait toute la magie --&gt;</span>
+    &lt;<span class="t">parent</span>&gt;
+        &lt;<span class="t">groupId</span>&gt;org.springframework.boot&lt;/<span class="t">groupId</span>&gt;
+        &lt;<span class="t">artifactId</span>&gt;spring-boot-starter-parent&lt;/<span class="t">artifactId</span>&gt;
+        &lt;<span class="t">version</span>&gt;4.1.0&lt;/<span class="t">version</span>&gt;
+    &lt;/<span class="t">parent</span>&gt;
+
+    <span class="c">&lt;!-- 3. L'IDENTITÉ de VOTRE projet --&gt;</span>
+    &lt;<span class="t">groupId</span>&gt;fr.bibliotheque&lt;/<span class="t">groupId</span>&gt;
+    &lt;<span class="t">artifactId</span>&gt;api&lt;/<span class="t">artifactId</span>&gt;
+    &lt;<span class="t">version</span>&gt;0.0.1-SNAPSHOT&lt;/<span class="t">version</span>&gt;
+
+    <span class="c">&lt;!-- 4. LES RÉGLAGES --&gt;</span>
+    &lt;<span class="t">properties</span>&gt;
+        &lt;<span class="t">java.version</span>&gt;21&lt;/<span class="t">java.version</span>&gt;
+    &lt;/<span class="t">properties</span>&gt;
+
+    <span class="c">&lt;!-- 5. LA LISTE DE COURSES --&gt;</span>
+    &lt;<span class="t">dependencies</span>&gt;
+        &lt;<span class="t">dependency</span>&gt;
+            &lt;<span class="t">groupId</span>&gt;org.springframework.boot&lt;/<span class="t">groupId</span>&gt;
+            &lt;<span class="t">artifactId</span>&gt;spring-boot-starter-webmvc&lt;/<span class="t">artifactId</span>&gt;
+        &lt;/<span class="t">dependency</span>&gt;
+        &lt;<span class="t">dependency</span>&gt;
+            &lt;<span class="t">groupId</span>&gt;org.springframework.boot&lt;/<span class="t">groupId</span>&gt;
+            &lt;<span class="t">artifactId</span>&gt;spring-boot-starter-data-jpa&lt;/<span class="t">artifactId</span>&gt;
+        &lt;/<span class="t">dependency</span>&gt;
+        &lt;<span class="t">dependency</span>&gt;
+            &lt;<span class="t">groupId</span>&gt;org.springframework.boot&lt;/<span class="t">groupId</span>&gt;
+            &lt;<span class="t">artifactId</span>&gt;spring-boot-starter-validation&lt;/<span class="t">artifactId</span>&gt;
+        &lt;/<span class="t">dependency</span>&gt;
+
+        &lt;<span class="t">dependency</span>&gt;
+            &lt;<span class="t">groupId</span>&gt;org.postgresql&lt;/<span class="t">groupId</span>&gt;
+            &lt;<span class="t">artifactId</span>&gt;postgresql&lt;/<span class="t">artifactId</span>&gt;
+            &lt;<span class="t">scope</span>&gt;runtime&lt;/<span class="t">scope</span>&gt;   <span class="c">&lt;!-- utile à l'exécution seulement --&gt;</span>
+        &lt;/<span class="t">dependency</span>&gt;
+    &lt;/<span class="t">dependencies</span>&gt;
+
+    <span class="c">&lt;!-- 6. LE PLUGIN qui fabrique le .jar exécutable --&gt;</span>
+    &lt;<span class="t">build</span>&gt;
+        &lt;<span class="t">plugins</span>&gt;
+            &lt;<span class="t">plugin</span>&gt;
+                &lt;<span class="t">groupId</span>&gt;org.springframework.boot&lt;/<span class="t">groupId</span>&gt;
+                &lt;<span class="t">artifactId</span>&gt;spring-boot-maven-plugin&lt;/<span class="t">artifactId</span>&gt;
+            &lt;/<span class="t">plugin</span>&gt;
+        &lt;/<span class="t">plugins</span>&gt;
+    &lt;/<span class="t">build</span>&gt;
+&lt;/<span class="t">project</span>&gt;</pre>
+
+<p><strong>Analysons ce fichier bloc par bloc :</strong></p>
+
+<div class="tw">
+<table>
+<thead><tr><th>Bloc</th><th>Ce qu'il fait réellement</th></tr></thead>
+<tbody>
+<tr><td><strong>2 · <code>&lt;parent&gt;</code></strong></td><td>Le bloc le plus important. Votre <code>pom.xml</code> <em>hérite</em> de celui de Spring Boot, qui contient déjà les versions compatibles de plusieurs centaines de bibliothèques. C'est pour cela que les dépendances suivantes n'ont <strong>pas de numéro de version</strong> : le parent l'a déjà décidé pour vous, et il a testé que tout fonctionne ensemble</td></tr>
+<tr><td><strong>3 · l'identité</strong></td><td><code>groupId</code> + <code>artifactId</code> + <code>version</code> forment les <em>coordonnées</em> uniques du projet, comme une adresse postale. Toute bibliothèque du monde Java se désigne par ces trois valeurs</td></tr>
+<tr><td><strong>4 · <code>&lt;properties&gt;</code></strong></td><td>Des réglages réutilisables. <code>java.version</code> indique avec quelle version compiler</td></tr>
+<tr><td><strong>5 · <code>&lt;dependencies&gt;</code></strong></td><td>La liste de courses. Un <strong>starter</strong> n'est pas une bibliothèque : c'est un <em>lot</em> de bibliothèques cohérentes. <code>spring-boot-starter-data-jpa</code> à lui seul apporte Hibernate, l'API JPA, le pool de connexions et la gestion des transactions</td></tr>
+<tr><td><strong><code>&lt;scope&gt;runtime&lt;/scope&gt;</code></strong></td><td>Le pilote PostgreSQL n'est pas nécessaire pour <em>compiler</em> — votre code ne le nomme jamais — mais il l'est pour <em>exécuter</em>. Le déclarer ainsi évite qu'un développeur l'utilise par erreur dans le code</td></tr>
+<tr><td><strong>6 · le plugin</strong></td><td>C'est lui qui produit un <code>.jar</code> contenant votre code <em>et</em> le serveur Tomcat <em>et</em> toutes les dépendances. Un seul fichier, lançable par <code>java -jar</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+<span class="lbl">🎯 Pourquoi les dépendances n'ont pas de version</span>
+<p>Parce que le <code>&lt;parent&gt;</code> les fixe. C'est exactement le principe de <strong>convention plutôt que configuration</strong> vu à la séance précédente : Spring Boot a choisi pour vous un jeu de versions qui fonctionnent ensemble, et vous n'avez rien à décider. Le jour où vous devrez forcer une version précise, vous l'écrirez explicitement — et vous saurez que vous prenez un risque.</p>
+</div>
+
+<h3>La classe principale</h3>
+
+<pre data-lang="Java"><span class="k">package</span> fr.bibliotheque.api;
+
+<span class="k">import</span> org.springframework.boot.SpringApplication;
+<span class="k">import</span> org.springframework.boot.autoconfigure.SpringBootApplication;
+
+<span class="k">@SpringBootApplication</span>
+<span class="k">public class</span> <span class="t">ApiApplication</span> {
+
+    <span class="k">public static void</span> <span class="f">main</span>(<span class="t">String</span>[] args) {
+        <span class="t">SpringApplication</span>.<span class="f">run</span>(<span class="t">ApiApplication</span>.<span class="k">class</span>, args);
+    }
+}</pre>
+
+<p><strong>Analysons ce code ligne par ligne :</strong></p>
+<ol>
+  <li><code>@SpringBootApplication</code> — une seule étiquette qui en vaut trois : elle active l'<strong>auto-configuration</strong>, déclare la classe comme source de configuration, et lance le <strong>balayage des paquets</strong> à partir d'ici. C'est cette dernière fonction qui explique l'avertissement de la §3.</li>
+  <li><code>SpringApplication.run(...)</code> — la seule ligne que vous exécutez vous-même. Elle démarre le conteneur IoC, qui fabrique tous vos objets, puis lance Tomcat.</li>
+  <li>Après cette ligne, <strong>vous n'appelez plus jamais rien</strong>. C'est l'inversion de contrôle : à partir d'ici, c'est le framework qui appelle votre code.</li>
+</ol>
+
+<h3>La configuration : application.properties</h3>
+
+<p>Ouvrez <code>src/main/resources/application.properties</code>. Il est vide. Remplissez-le :</p>
+
+<pre data-lang="application.properties"><span class="c"># ── Connexion à PostgreSQL ────────────────────────────────</span>
+spring.datasource.url=jdbc:postgresql://localhost:5432/bibliotheque
+spring.datasource.username=postgres
+spring.datasource.password=votre_mot_de_passe
+
+<span class="c"># ── Comportement de l'ORM ─────────────────────────────────</span>
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+
+<span class="c"># ── Serveur ───────────────────────────────────────────────</span>
+server.port=8080</pre>
+
+<div class="tw">
+<table>
+<thead><tr><th>Propriété</th><th>Ce qu'elle règle</th></tr></thead>
+<tbody>
+<tr><td><code>spring.datasource.url</code></td><td>L'adresse de la base. <code>jdbc:postgresql://</code> désigne le protocole, <code>5432</code> le port par défaut de PostgreSQL, <code>bibliotheque</code> le nom de la base</td></tr>
+<tr><td><code>ddl-auto=update</code></td><td>Hibernate compare vos entités aux tables existantes et <strong>crée ce qui manque</strong> au démarrage. Très pratique en apprentissage</td></tr>
+<tr><td><code>show-sql=true</code></td><td>Affiche dans la console chaque requête SQL générée. <strong>Laissez-le activé pendant tout le TP</strong></td></tr>
+<tr><td><code>format_sql=true</code></td><td>Met le SQL affiché en forme, sur plusieurs lignes</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box warn">
+<span class="lbl">⚠️ ddl-auto : jamais en production</span>
+<p><code>update</code> ne sait qu'ajouter : il ne supprime jamais une colonne devenue inutile et ne renomme rien. Sur un vrai projet, on met <code>validate</code> — Hibernate vérifie que la base correspond aux entités et refuse de démarrer sinon — et l'évolution des tables est confiée à un outil de migration comme Flyway ou Liquibase.</p>
+<p>Et surtout : <code>create-drop</code> <strong>efface toutes vos tables à chaque arrêt</strong>. Ne le tapez pas par curiosité sur une base qui contient quelque chose.</p>
+</div>
+
+<div class="box tip">
+<span class="lbl">💡 Le mot de passe n'a rien à faire là</span>
+<p>Un mot de passe écrit dans un fichier versionné finit sur GitHub. En vrai projet, on utilise une variable d'environnement : <code>spring.datasource.password=${DB_PASSWORD}</code>. Pour ce TP en local, on l'écrit en clair — mais prenez l'habitude de vérifier ce que vous versionnez.</p>
+</div>
+
+<p>Lancez maintenant l'application : clic droit sur <code>ApiApplication</code> → <em>Run</em>, ou <code>./mvnw spring-boot:run</code> dans un terminal. Vous devez voir la bannière Spring et, en dernière ligne, quelque chose comme <code>Tomcat started on port 8080</code>. Si c'est le cas, la connexion à PostgreSQL fonctionne.</p>
+</section>
+
+<section id="s5">
+<h2>Les entités</h2>
+<p class="section-sub">Première étape de code : traduire les tables en classes Java.</p>
+
+<div class="meta">
+<span class="lbl">La fiche cartonnée</span>
+<p>Avant l'informatique, une bibliothèque fonctionnait déjà. Chaque ouvrage avait sa <strong>fiche cartonnée</strong> : titre, ISBN, année, rangée dans le tiroir « LIVRES » du meuble à fiches.</p>
+<p>Une <strong>entité</strong> est cette fiche, en Java. Le <strong>tiroir</strong> est la table PostgreSQL. Et l'annotation <code>@Entity</code> est l'étiquette collée sur la fiche qui dit : « celle-ci va dans le tiroir LIVRE ».</p>
+</div>
+
+<p>Créez le paquet <code>fr.bibliotheque.api.entite</code>. Nous y mettrons trois classes.</p>
+
+<div class="box tip">
+<span class="lbl">💡 Un mot sur les noms français</span>
+<p>Nous nommons les paquets en français pour que la correspondance avec le MCD saute aux yeux. En entreprise, la convention est l'anglais : <code>entity</code>, <code>repository</code>, <code>service</code>, <code>controller</code>. Les annotations, elles, sont toujours en anglais : ce sont celles de Spring.</p>
+</div>
+
+<h3>Categorie : la plus simple</h3>
+
+<pre data-lang="Java"><span class="k">package</span> fr.bibliotheque.api.entite;
+
+<span class="k">import</span> jakarta.persistence.*;
+
+<span class="k">@Entity</span>                              <span class="c">// « cette classe correspond à une table »</span>
+<span class="k">@Table</span>(name = <span class="s">"categorie"</span>)          <span class="c">// laquelle, précisément</span>
+<span class="k">public class</span> <span class="t">Categorie</span> {
+
+    <span class="k">@Id</span>                                              <span class="c">// la clé primaire</span>
+    <span class="k">@GeneratedValue</span>(strategy = <span class="t">GenerationType</span>.IDENTITY)
+    <span class="k">@Column</span>(name = <span class="s">"id_categorie"</span>)
+    <span class="k">private</span> <span class="t">Long</span> id;
+
+    <span class="k">@Column</span>(name = <span class="s">"libelle"</span>, nullable = <span class="k">false</span>, length = <span class="n">50</span>, unique = <span class="k">true</span>)
+    <span class="k">private</span> <span class="t">String</span> libelle;
+
+    <span class="k">protected</span> <span class="f">Categorie</span>() { }        <span class="c">// exigé par JPA — voir l'avertissement</span>
+
+    <span class="k">public</span> <span class="f">Categorie</span>(<span class="t">String</span> libelle) {
+        <span class="k">this</span>.libelle = libelle;
+    }
+
+    <span class="k">public</span> <span class="t">Long</span> <span class="f">getId</span>() { <span class="k">return</span> id; }
+    <span class="k">public</span> <span class="t">String</span> <span class="f">getLibelle</span>() { <span class="k">return</span> libelle; }
+    <span class="k">public void</span> <span class="f">setLibelle</span>(<span class="t">String</span> libelle) { <span class="k">this</span>.libelle = libelle; }
+}</pre>
+
+<p><strong>Analysons ce code ligne par ligne :</strong></p>
+<ol>
+  <li><code>import jakarta.persistence.*</code> — le paquet de la norme JPA. Attention : les tutoriels d'avant 2023 écrivent <code>javax.persistence</code>. C'est l'ancien nom, il ne compile plus.</li>
+  <li><code>@Entity</code> — l'étiquette essentielle. Sans elle, Hibernate ignore totalement la classe : ce n'est plus qu'un objet Java ordinaire.</li>
+  <li><code>@Table(name = "categorie")</code> — le nom exact de la table. Sans cette annotation, Hibernate déduirait le nom depuis celui de la classe. On l'écrit explicitement pour rester maître du MPD qu'on a modélisé.</li>
+  <li><code>@Id</code> — désigne l'attribut qui porte la clé primaire. <strong>Obligatoire</strong> : une entité sans <code>@Id</code> fait échouer le démarrage.</li>
+  <li><code>@GeneratedValue(strategy = IDENTITY)</code> — « c'est la base qui attribue le numéro, pas moi ». <code>IDENTITY</code> correspond exactement au <code>BIGSERIAL</code> de PostgreSQL.</li>
+  <li><code>@Column(name = "id_categorie")</code> — le pont entre le <code>snake_case</code> de SQL et le <code>camelCase</code> de Java. L'attribut s'appelle <code>id</code>, la colonne <code>id_categorie</code>.</li>
+  <li><code>nullable = false, length = 50, unique = true</code> — les contraintes, recopiées depuis votre MPD. Elles servent à Hibernate pour générer la table, et documentent l'intention.</li>
+  <li><code>protected Categorie() { }</code> — le constructeur sans argument. Hibernate en a besoin pour reconstruire un objet depuis une ligne lue en base. <code>protected</code> plutôt que <code>public</code> : Hibernate y accède, votre code non.</li>
+  <li>Pas de <em>setter</em> sur <code>id</code> : personne ne doit pouvoir changer une clé primaire à la main.</li>
+</ol>
+
+<div class="meta">
+<span class="lbl">Le distributeur de tickets</span>
+<p><code>@GeneratedValue</code>, c'est la machine à tickets de la boucherie. Vous ne choisissez pas votre numéro : vous appuyez, la machine vous en donne un, et il est forcément unique. C'est la base qui tient le compteur, jamais votre code.</p>
+</div>
+
+<div class="box warn">
+<span class="lbl">⚠️ Le constructeur vide oublié</span>
+<p>C'est l'erreur numéro un du premier TP. Si vous écrivez un constructeur avec paramètres, Java supprime le constructeur vide par défaut. Hibernate, lui, en a absolument besoin. Le message est cryptique : <em>« No default constructor for entity »</em>. Dès que vous ajoutez un constructeur à une entité, ajoutez aussi le constructeur vide.</p>
+</div>
+
+<h3>Auteur</h3>
+
+<p>Même structure, aucune surprise. Écrivez-la vous-même avant de regarder :</p>
+
+<pre data-lang="Java"><span class="k">@Entity</span>
+<span class="k">@Table</span>(name = <span class="s">"auteur"</span>)
+<span class="k">public class</span> <span class="t">Auteur</span> {
+
+    <span class="k">@Id</span>
+    <span class="k">@GeneratedValue</span>(strategy = <span class="t">GenerationType</span>.IDENTITY)
+    <span class="k">@Column</span>(name = <span class="s">"id_auteur"</span>)
+    <span class="k">private</span> <span class="t">Long</span> id;
+
+    <span class="k">@Column</span>(nullable = <span class="k">false</span>, length = <span class="n">60</span>)
+    <span class="k">private</span> <span class="t">String</span> nom;
+
+    <span class="k">@Column</span>(length = <span class="n">60</span>)
+    <span class="k">private</span> <span class="t">String</span> prenom;
+
+    <span class="k">protected</span> <span class="f">Auteur</span>() { }
+
+    <span class="k">public</span> <span class="f">Auteur</span>(<span class="t">String</span> nom, <span class="t">String</span> prenom) {
+        <span class="k">this</span>.nom = nom;
+        <span class="k">this</span>.prenom = prenom;
+    }
+
+    <span class="k">public</span> <span class="t">Long</span> <span class="f">getId</span>() { <span class="k">return</span> id; }
+    <span class="k">public</span> <span class="t">String</span> <span class="f">getNom</span>() { <span class="k">return</span> nom; }
+    <span class="k">public</span> <span class="t">String</span> <span class="f">getPrenom</span>() { <span class="k">return</span> prenom; }
+}</pre>
+
+<p>Remarquez : <code>@Column</code> sans <code>name</code> pour <code>nom</code> et <code>prenom</code>. Quand l'attribut Java et la colonne portent le même nom, on peut omettre le paramètre.</p>
+
+<h3>Livre : les relations</h3>
+
+<p>C'est ici que le MCD devient du code. Deux associations à traduire.</p>
+
+<pre data-lang="Java"><span class="k">package</span> fr.bibliotheque.api.entite;
+
+<span class="k">import</span> jakarta.persistence.*;
+<span class="k">import</span> java.util.HashSet;
+<span class="k">import</span> java.util.Set;
+
+<span class="k">@Entity</span>
+<span class="k">@Table</span>(name = <span class="s">"livre"</span>)
+<span class="k">public class</span> <span class="t">Livre</span> {
+
+    <span class="k">@Id</span>
+    <span class="k">@GeneratedValue</span>(strategy = <span class="t">GenerationType</span>.IDENTITY)
+    <span class="k">@Column</span>(name = <span class="s">"id_livre"</span>)
+    <span class="k">private</span> <span class="t">Long</span> id;
+
+    <span class="k">@Column</span>(nullable = <span class="k">false</span>, length = <span class="n">200</span>)
+    <span class="k">private</span> <span class="t">String</span> titre;
+
+    <span class="k">@Column</span>(nullable = <span class="k">false</span>, unique = <span class="k">true</span>, length = <span class="n">13</span>)
+    <span class="k">private</span> <span class="t">String</span> isbn;
+
+    <span class="k">@Column</span>(name = <span class="s">"annee_publication"</span>)
+    <span class="k">private</span> <span class="t">Integer</span> anneePublication;
+
+    <span class="k">@Column</span>(name = <span class="s">"nb_pages"</span>)
+    <span class="k">private</span> <span class="t">Integer</span> nbPages;
+
+    <span class="c">// ── APPARTENIR : (1,1) côté LIVRE → une clé étrangère ──────</span>
+    <span class="k">@ManyToOne</span>(fetch = <span class="t">FetchType</span>.LAZY, optional = <span class="k">false</span>)
+    <span class="k">@JoinColumn</span>(name = <span class="s">"id_categorie"</span>, nullable = <span class="k">false</span>)
+    <span class="k">private</span> <span class="t">Categorie</span> categorie;
+
+    <span class="c">// ── ECRIRE : (1,n)-(1,n) → une table de jointure ───────────</span>
+    <span class="k">@ManyToMany</span>(fetch = <span class="t">FetchType</span>.LAZY)
+    <span class="k">@JoinTable</span>(
+        name = <span class="s">"ecrire"</span>,
+        joinColumns        = <span class="k">@JoinColumn</span>(name = <span class="s">"id_livre"</span>),
+        inverseJoinColumns = <span class="k">@JoinColumn</span>(name = <span class="s">"id_auteur"</span>))
+    <span class="k">private</span> <span class="t">Set</span>&lt;<span class="t">Auteur</span>&gt; auteurs = <span class="k">new</span> <span class="t">HashSet</span>&lt;&gt;();
+
+    <span class="k">protected</span> <span class="f">Livre</span>() { }
+
+    <span class="k">public</span> <span class="f">Livre</span>(<span class="t">String</span> titre, <span class="t">String</span> isbn, <span class="t">Integer</span> annee, <span class="t">Categorie</span> categorie) {
+        <span class="k">this</span>.titre = titre;
+        <span class="k">this</span>.isbn = isbn;
+        <span class="k">this</span>.anneePublication = annee;
+        <span class="k">this</span>.categorie = categorie;
+    }
+
+    <span class="k">public void</span> <span class="f">ajouterAuteur</span>(<span class="t">Auteur</span> auteur) {
+        <span class="k">this</span>.auteurs.<span class="f">add</span>(auteur);
+    }
+
+    <span class="k">public</span> <span class="t">Long</span> <span class="f">getId</span>()                  { <span class="k">return</span> id; }
+    <span class="k">public</span> <span class="t">String</span> <span class="f">getTitre</span>()             { <span class="k">return</span> titre; }
+    <span class="k">public</span> <span class="t">String</span> <span class="f">getIsbn</span>()              { <span class="k">return</span> isbn; }
+    <span class="k">public</span> <span class="t">Integer</span> <span class="f">getAnneePublication</span>() { <span class="k">return</span> anneePublication; }
+    <span class="k">public</span> <span class="t">Integer</span> <span class="f">getNbPages</span>()          { <span class="k">return</span> nbPages; }
+    <span class="k">public</span> <span class="t">Categorie</span> <span class="f">getCategorie</span>()      { <span class="k">return</span> categorie; }
+    <span class="k">public</span> <span class="t">Set</span>&lt;<span class="t">Auteur</span>&gt; <span class="f">getAuteurs</span>()      { <span class="k">return</span> auteurs; }
+
+    <span class="k">public void</span> <span class="f">setTitre</span>(<span class="t">String</span> titre)   { <span class="k">this</span>.titre = titre; }
+    <span class="k">public void</span> <span class="f">setAnneePublication</span>(<span class="t">Integer</span> a) { <span class="k">this</span>.anneePublication = a; }
+    <span class="k">public void</span> <span class="f">setNbPages</span>(<span class="t">Integer</span> n)   { <span class="k">this</span>.nbPages = n; }
+    <span class="k">public void</span> <span class="f">setCategorie</span>(<span class="t">Categorie</span> c) { <span class="k">this</span>.categorie = c; }
+}</pre>
+
+<p><strong>Analysons les deux relations, ligne par ligne :</strong></p>
+
+<h4>La relation vers Categorie</h4>
+<ol>
+  <li><code>@ManyToOne</code> — se lit dans ce sens : <strong>plusieurs</strong> livres pour <strong>une</strong> catégorie. C'est la traduction directe du <code>(1,1)</code> côté LIVRE dans le MCD.</li>
+  <li><code>@JoinColumn(name = "id_categorie")</code> — indique <strong>quelle colonne</strong> porte la clé étrangère, dans la table <code>livre</code>. Sans cette annotation, Hibernate inventerait un nom de colonne.</li>
+  <li><code>optional = false</code> — un livre a forcément une catégorie. C'est le <code>1,1</code> du MCD, exprimé en Java.</li>
+  <li>Notez le type : <code>Categorie categorie</code>, pas <code>Long idCategorie</code>. <strong>C'est tout l'intérêt de l'ORM</strong> : vous manipulez un objet, pas un numéro. <code>livre.getCategorie().getLibelle()</code> fonctionne, sans que vous n'écriviez la moindre jointure.</li>
+</ol>
+
+<h4>La relation vers Auteur</h4>
+<ol>
+  <li><code>@ManyToMany</code> — plusieurs livres pour plusieurs auteurs. La traduction du <code>(1,n)-(1,n)</code>.</li>
+  <li><code>@JoinTable(name = "ecrire")</code> — le nom de la table de jointure, celle que vous aviez déduite du MCD.</li>
+  <li><code>joinColumns</code> — la colonne qui pointe vers <strong>cette</strong> entité, celle où l'on est : <code>id_livre</code>.</li>
+  <li><code>inverseJoinColumns</code> — la colonne qui pointe vers l'<strong>autre</strong> entité : <code>id_auteur</code>. La confusion entre ces deux paramètres est fréquente ; retenez « join = moi, inverse = l'autre ».</li>
+  <li><code>Set&lt;Auteur&gt;</code> plutôt que <code>List&lt;Auteur&gt;</code> — un même auteur ne peut pas écrire deux fois le même livre. Le <code>Set</code> l'interdit par construction, et évite des doublons désagréables.</li>
+  <li><code>= new HashSet&lt;&gt;()</code> — la collection est initialisée dès la déclaration. Sans cela, <code>ajouterAuteur</code> déclencherait un <code>NullPointerException</code> sur un livre neuf.</li>
+</ol>
+
+<div class="tw">
+<table>
+<thead><tr><th>Dans le MCD</th><th>Dans le MPD</th><th>Dans l'entité JPA</th></tr></thead>
+<tbody>
+<tr><td>Entité</td><td>Table</td><td>Classe <code>@Entity</code></td></tr>
+<tr><td>Attribut</td><td>Colonne</td><td>Attribut <code>@Column</code></td></tr>
+<tr><td>Identifiant</td><td><code>PRIMARY KEY</code></td><td><code>@Id</code> + <code>@GeneratedValue</code></td></tr>
+<tr><td>Association (1,1) — (0,n)</td><td>Clé étrangère</td><td><code>@ManyToOne</code> + <code>@JoinColumn</code></td></tr>
+<tr><td>Association (0,n) — (1,1)</td><td>&mdash; (côté inverse)</td><td><code>@OneToMany(mappedBy = ...)</code></td></tr>
+<tr><td>Association (1,n) — (1,n)</td><td>Table de jointure</td><td><code>@ManyToMany</code> + <code>@JoinTable</code></td></tr>
+<tr><td>Association porteuse d'attributs</td><td>Table à part entière</td><td>Une <code>@Entity</code> de plus</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box warn">
+<span class="lbl">⚠️ LAZY, EAGER, et l'erreur que vous allez rencontrer</span>
+<p><code>fetch = LAZY</code> signifie : « ne va chercher les auteurs en base que si on me les demande vraiment ». C'est la bonne pratique — cela évite de charger la moitié de la base à chaque lecture.</p>
+<p>Mais si vous appelez <code>livre.getAuteurs()</code> <strong>après</strong> la fin de la transaction, Hibernate n'a plus de connexion pour aller les chercher, et lève une <code>LazyInitializationException</code>. Nous réglerons ce point proprement en §6 avec une requête de chargement explicite. Retenez pour l'instant que l'erreur existe et d'où elle vient.</p>
+</div>
+
+<div class="box warn">
+<span class="lbl">⚠️ Ne mettez jamais la relation inverse « pour faire joli »</span>
+<p>La tentation est grande d'ajouter <code>List&lt;Livre&gt; livres</code> dans <code>Categorie</code> avec <code>@OneToMany</code>. Ne le faites pas tant que vous n'en avez pas besoin : chaque relation bidirectionnelle est une source de sérialisation infinie en JSON — le livre contient sa catégorie, qui contient ses livres, qui contiennent leur catégorie… Ajoutez la relation inverse le jour où une fonctionnalité l'exige.</p>
+</div>
+
+<div class="box key">
+<span class="lbl">🎯 Ce que vous venez de faire</span>
+<p>Vous avez décrit vos tables <strong>une seule fois</strong>, en Java. Hibernate saura désormais lire, écrire et joindre ces tables sans que vous écriviez une ligne de SQL. Relancez l'application : dans la console, vous devriez voir défiler les <code>create table</code> qu'Hibernate exécute.</p>
+</div>
+</section>
+
+<section id="s6">
+<h2>Le repository</h2>
+<p class="section-sub">La couche qui parle à la base. C'est l'étape la plus courte du TP — et la plus surprenante.</p>
+
+<div class="meta">
+<span class="lbl">Le magasinier</span>
+<p>Vous embauchez un magasinier pour la réserve. Vous n'avez pas besoin de lui expliquer comment ranger un livre, comment le retrouver par son numéro, comment compter le stock ou comment jeter un exemplaire abîmé : <strong>il sait déjà</strong>. Ces gestes sont son métier.</p>
+<p>Vous ne lui apprenez que ce qui est propre à votre bibliothèque : « ici, on classe aussi par fragment de titre ».</p>
+</div>
+
+<p>Créez le paquet <code>fr.bibliotheque.api.repository</code>. Voici le fichier complet :</p>
+
+<pre data-lang="Java"><span class="k">package</span> fr.bibliotheque.api.repository;
+
+<span class="k">import</span> fr.bibliotheque.api.entite.Livre;
+<span class="k">import</span> org.springframework.data.jpa.repository.JpaRepository;
+<span class="k">import</span> org.springframework.data.jpa.repository.Query;
+
+<span class="k">import</span> java.util.List;
+<span class="k">import</span> java.util.Optional;
+
+<span class="k">public interface</span> <span class="t">LivreRepository</span> <span class="k">extends</span> <span class="t">JpaRepository</span>&lt;<span class="t">Livre</span>, <span class="t">Long</span>&gt; {
+
+    <span class="c">// 1. Méthode déduite du nom : Spring écrit le SQL tout seul</span>
+    <span class="k">boolean</span> <span class="f">existsByIsbn</span>(<span class="t">String</span> isbn);
+
+    <span class="c">// 2. Idem, avec un LIKE insensible à la casse</span>
+    <span class="t">List</span>&lt;<span class="t">Livre</span>&gt; <span class="f">findByTitreContainingIgnoreCase</span>(<span class="t">String</span> fragment);
+
+    <span class="c">// 3. Chargement explicite des relations (voir l'avertissement §5)</span>
+    <span class="k">@Query</span>(<span class="s">"select l from Livre l "</span> +
+           <span class="s">"join fetch l.categorie "</span> +
+           <span class="s">"left join fetch l.auteurs"</span>)
+    <span class="t">List</span>&lt;<span class="t">Livre</span>&gt; <span class="f">listerAvecDetails</span>();
+
+    <span class="k">@Query</span>(<span class="s">"select l from Livre l "</span> +
+           <span class="s">"join fetch l.categorie "</span> +
+           <span class="s">"left join fetch l.auteurs "</span> +
+           <span class="s">"where l.id = :id"</span>)
+    <span class="t">Optional</span>&lt;<span class="t">Livre</span>&gt; <span class="f">trouverAvecDetails</span>(<span class="t">Long</span> id);
+}</pre>
+
+<p><strong>Analysons ce code ligne par ligne :</strong></p>
+<ol>
+  <li><code>public interface</code> — c'est une <strong>interface</strong>, pas une classe. Vous n'écrirez jamais son implémentation : Spring Data la génère au démarrage et l'enregistre dans le conteneur IoC. C'est le moment le plus déroutant du TP.</li>
+  <li><code>extends JpaRepository&lt;Livre, Long&gt;</code> — deux paramètres de généricité : le <strong>type de l'entité</strong> gérée, et le <strong>type de sa clé primaire</strong>. Cet <code>extends</code> vous offre d'un coup toutes les méthodes du tableau ci-dessous.</li>
+  <li><code>existsByIsbn(String isbn)</code> — une <strong>méthode déduite du nom</strong> <em class="en">(derived query method)</em>. Spring lit le nom, le découpe en mots-clés — <code>exists</code>, <code>By</code>, <code>Isbn</code> — et fabrique <code>SELECT COUNT(*) FROM livre WHERE isbn = ?</code>. Vous n'écrivez que la signature.</li>
+  <li><code>findByTitreContainingIgnoreCase</code> — même mécanisme : <code>Containing</code> produit un <code>LIKE %...%</code>, <code>IgnoreCase</code> ajoute un <code>LOWER()</code>. Le nom de la méthode <em>est</em> la requête.</li>
+  <li><code>@Query(...)</code> — quand le nom ne suffit plus, on écrit la requête en <strong>JPQL</strong>. Ce n'est pas du SQL : on y nomme les <em>classes</em> et les <em>attributs</em> Java (<code>Livre</code>, <code>l.categorie</code>), pas les tables et colonnes. Hibernate traduira.</li>
+  <li><code>join fetch</code> — la clé du problème signalé en §5. Cela demande à Hibernate de charger le livre <strong>et</strong> sa catégorie <strong>et</strong> ses auteurs en une seule requête. Plus de <code>LazyInitializationException</code>, et surtout : plus de problème N+1.</li>
+  <li><code>left join fetch</code> pour les auteurs — le <code>left</code> conserve les livres qui n'ont encore aucun auteur. Un <code>join</code> simple les ferait disparaître du résultat.</li>
+  <li><code>Optional&lt;Livre&gt;</code> — le type qui dit « peut-être un livre, peut-être rien ». Il oblige l'appelant à traiter le cas absent, au lieu de renvoyer <code>null</code> et de laisser exploser plus loin.</li>
+</ol>
+
+<div class="box recall">
+<span class="lbl">📝 Le problème N+1, souvenez-vous</span>
+<p>Sans <code>join fetch</code>, lister 100 livres puis afficher la catégorie de chacun déclenche 1 requête pour la liste, puis 100 requêtes pour les catégories. C'est le problème N+1 vu à la séance précédente. La console avec <code>show-sql=true</code> vous le montre immédiatement : vous voyez 101 <code>select</code> défiler.</p>
+</div>
+
+<h3>Ce que JpaRepository vous donne gratuitement</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th>Méthode héritée</th><th>Ce qu'elle fait</th><th>SQL produit</th></tr></thead>
+<tbody>
+<tr><td><code>findAll()</code></td><td>Tous les livres</td><td><code>SELECT * FROM livre</code></td></tr>
+<tr><td><code>findById(Long)</code></td><td>Un livre, dans un <code>Optional</code></td><td><code>SELECT ... WHERE id_livre = ?</code></td></tr>
+<tr><td><code>save(Livre)</code></td><td>Crée <strong>ou</strong> met à jour, selon que l'id est nul</td><td><code>INSERT</code> ou <code>UPDATE</code></td></tr>
+<tr><td><code>deleteById(Long)</code></td><td>Supprime</td><td><code>DELETE ... WHERE id_livre = ?</code></td></tr>
+<tr><td><code>existsById(Long)</code></td><td>Teste la présence</td><td><code>SELECT COUNT(*) ...</code></td></tr>
+<tr><td><code>count()</code></td><td>Compte les lignes</td><td><code>SELECT COUNT(*) FROM livre</code></td></tr>
+<tr><td><code>findAll(Pageable)</code></td><td>Une page de résultats</td><td><code>... LIMIT ? OFFSET ?</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Créez maintenant les deux repositories manquants. Ils tiennent en trois lignes chacun :</p>
+
+<pre data-lang="Java"><span class="k">public interface</span> <span class="t">CategorieRepository</span> <span class="k">extends</span> <span class="t">JpaRepository</span>&lt;<span class="t">Categorie</span>, <span class="t">Long</span>&gt; { }
+
+<span class="k">public interface</span> <span class="t">AuteurRepository</span> <span class="k">extends</span> <span class="t">JpaRepository</span>&lt;<span class="t">Auteur</span>, <span class="t">Long</span>&gt; { }</pre>
+
+<div class="box tip">
+<span class="lbl">💡 Le vocabulaire des méthodes déduites</span>
+<p>Quelques mots-clés à connaître : <code>findBy</code>, <code>existsBy</code>, <code>countBy</code>, <code>deleteBy</code> pour l'action ; puis <code>And</code>, <code>Or</code>, <code>Between</code>, <code>LessThan</code>, <code>GreaterThan</code>, <code>Containing</code>, <code>StartingWith</code>, <code>IgnoreCase</code>, <code>OrderBy...Desc</code> pour la condition. Exemple lisible d'un coup : <code>findByAnneePublicationGreaterThanOrderByTitreAsc(int annee)</code>.</p>
+</div>
+
+<div class="box warn">
+<span class="lbl">⚠️ Une faute de frappe dans le nom = échec au démarrage</span>
+<p>Si vous écrivez <code>findByTitre<strong>e</strong>(String t)</code>, Spring cherche un attribut <code>titree</code> dans <code>Livre</code>, ne le trouve pas, et refuse de démarrer avec un message très long. C'est en réalité une bonne nouvelle : l'erreur est détectée <strong>au lancement</strong>, pas en production. Lisez la première ligne du message, elle nomme l'attribut introuvable.</p>
+</div>
+
+<div class="box key">
+<span class="lbl">🎯 Pourquoi cette couche est si courte</span>
+<p>Parce qu'elle ne prend <strong>aucune décision</strong>. Le magasinier ne juge pas ce qu'on lui demande. Si votre repository contient un <code>if</code>, une règle de gestion ou un calcul, c'est qu'une ligne s'est trompée d'étage : elle appartient au service.</p>
+</div>
+</section>
+
+<section id="s7">
+<h2>Le service</h2>
+<p class="section-sub">La couche qui décide. C'est le cœur de votre application.</p>
+
+<div class="meta">
+<span class="lbl">Le bibliothécaire</span>
+<p>Le magasinier sait aller chercher un livre. Le <strong>bibliothécaire</strong>, lui, connaît le règlement : on ne référence pas deux fois le même ISBN, on ne supprime pas un ouvrage emprunté, on refuse une fiche incomplète.</p>
+<p>Il ne range rien lui-même — il demande au magasinier. Mais c'est lui qui dit oui ou non.</p>
+</div>
+
+<h3>D'abord, les exceptions métier</h3>
+
+<p>Créez le paquet <code>fr.bibliotheque.api.erreur</code>. Deux classes très courtes :</p>
+
+<pre data-lang="Java"><span class="k">package</span> fr.bibliotheque.api.erreur;
+
+<span class="k">public class</span> <span class="t">LivreIntrouvableException</span> <span class="k">extends</span> <span class="t">RuntimeException</span> {
+    <span class="k">public</span> <span class="f">LivreIntrouvableException</span>(<span class="t">Long</span> id) {
+        <span class="k">super</span>(<span class="s">"Aucun livre avec l'identifiant "</span> + id);
+    }
+}</pre>
+
+<pre data-lang="Java"><span class="k">public class</span> <span class="t">IsbnDejaUtiliseException</span> <span class="k">extends</span> <span class="t">RuntimeException</span> {
+    <span class="k">public</span> <span class="f">IsbnDejaUtiliseException</span>(<span class="t">String</span> isbn) {
+        <span class="k">super</span>(<span class="s">"L'ISBN "</span> + isbn + <span class="s">" est déjà référencé"</span>);
+    }
+}</pre>
+
+<p>Pourquoi des exceptions plutôt que renvoyer <code>null</code> ou <code>false</code> ? Parce qu'elles portent un <strong>sens métier</strong>. En §10, nous les traduirons en codes HTTP : <code>404</code> et <code>409</code>. Le service, lui, n'a pas à connaître HTTP.</p>
+
+<h3>Le service</h3>
+
+<pre data-lang="Java"><span class="k">package</span> fr.bibliotheque.api.service;
+
+<span class="k">import</span> fr.bibliotheque.api.entite.Categorie;
+<span class="k">import</span> fr.bibliotheque.api.entite.Livre;
+<span class="k">import</span> fr.bibliotheque.api.erreur.*;
+<span class="k">import</span> fr.bibliotheque.api.repository.CategorieRepository;
+<span class="k">import</span> fr.bibliotheque.api.repository.LivreRepository;
+<span class="k">import</span> org.springframework.stereotype.Service;
+<span class="k">import</span> org.springframework.transaction.annotation.Transactional;
+
+<span class="k">import</span> java.util.List;
+
+<span class="k">@Service</span>                                   <span class="c">// « Spring, fabrique-moi cet objet »</span>
+<span class="k">@Transactional</span>(readOnly = <span class="k">true</span>)           <span class="c">// par défaut : lecture seule</span>
+<span class="k">public class</span> <span class="t">LivreService</span> {
+
+    <span class="k">private final</span> <span class="t">LivreRepository</span> livreRepository;
+    <span class="k">private final</span> <span class="t">CategorieRepository</span> categorieRepository;
+
+    <span class="c">// Injection par constructeur : Spring fournit les deux repositories</span>
+    <span class="k">public</span> <span class="f">LivreService</span>(<span class="t">LivreRepository</span> livreRepository,
+                        <span class="t">CategorieRepository</span> categorieRepository) {
+        <span class="k">this</span>.livreRepository = livreRepository;
+        <span class="k">this</span>.categorieRepository = categorieRepository;
+    }
+
+    <span class="c">// ── READ ───────────────────────────────────────────────</span>
+    <span class="k">public</span> <span class="t">List</span>&lt;<span class="t">Livre</span>&gt; <span class="f">lister</span>() {
+        <span class="k">return</span> livreRepository.<span class="f">listerAvecDetails</span>();
+    }
+
+    <span class="k">public</span> <span class="t">Livre</span> <span class="f">trouverParId</span>(<span class="t">Long</span> id) {
+        <span class="k">return</span> livreRepository.<span class="f">trouverAvecDetails</span>(id)
+                .<span class="f">orElseThrow</span>(() -&gt; <span class="k">new</span> <span class="t">LivreIntrouvableException</span>(id));
+    }
+
+    <span class="c">// ── CREATE ─────────────────────────────────────────────</span>
+    <span class="k">@Transactional</span>                          <span class="c">// écriture : on lève readOnly</span>
+    <span class="k">public</span> <span class="t">Livre</span> <span class="f">creer</span>(<span class="t">String</span> titre, <span class="t">String</span> isbn,
+                       <span class="t">Integer</span> annee, <span class="t">Long</span> idCategorie) {
+
+        <span class="k">if</span> (livreRepository.<span class="f">existsByIsbn</span>(isbn)) {      <span class="c">// RÈGLE MÉTIER n°1</span>
+            <span class="k">throw new</span> <span class="t">IsbnDejaUtiliseException</span>(isbn);
+        }
+
+        <span class="t">Categorie</span> categorie = categorieRepository.<span class="f">findById</span>(idCategorie)
+                .<span class="f">orElseThrow</span>(() -&gt; <span class="k">new</span> <span class="t">CategorieIntrouvableException</span>(idCategorie));
+
+        <span class="t">Livre</span> livre = <span class="k">new</span> <span class="t">Livre</span>(titre, isbn, annee, categorie);
+        <span class="k">return</span> livreRepository.<span class="f">save</span>(livre);
+    }
+
+    <span class="c">// ── UPDATE ─────────────────────────────────────────────</span>
+    <span class="k">@Transactional</span>
+    <span class="k">public</span> <span class="t">Livre</span> <span class="f">modifier</span>(<span class="t">Long</span> id, <span class="t">String</span> titre, <span class="t">Integer</span> annee) {
+        <span class="t">Livre</span> livre = <span class="f">trouverParId</span>(id);     <span class="c">// lève 404 si absent</span>
+        livre.<span class="f">setTitre</span>(titre);
+        livre.<span class="f">setAnneePublication</span>(annee);
+        <span class="k">return</span> livre;                        <span class="c">// pas de save() — voir ci-dessous</span>
+    }
+
+    <span class="c">// ── DELETE ─────────────────────────────────────────────</span>
+    <span class="k">@Transactional</span>
+    <span class="k">public void</span> <span class="f">supprimer</span>(<span class="t">Long</span> id) {
+        <span class="k">if</span> (!livreRepository.<span class="f">existsById</span>(id)) {
+            <span class="k">throw new</span> <span class="t">LivreIntrouvableException</span>(id);
+        }
+        livreRepository.<span class="f">deleteById</span>(id);
+    }
+}</pre>
+
+<p><strong>Analysons ce code ligne par ligne :</strong></p>
+<ol>
+  <li><code>@Service</code> — l'étiquette qui inscrit la classe au conteneur IoC. Techniquement identique à <code>@Component</code>, mais elle documente l'intention : « ceci est de la logique métier ».</li>
+  <li><code>private final</code> sur les deux repositories — <code>final</code> garantit qu'ils ne changeront jamais après la construction. C'est le « D » de SOLID appliqué.</li>
+  <li>Le <strong>constructeur</strong> — vous n'écrivez aucun <code>new LivreRepository()</code>. Spring voit les paramètres, cherche dans son inventaire, et injecte. Un seul constructeur suffit : depuis Spring 4.3, <code>@Autowired</code> est inutile dans ce cas.</li>
+  <li><code>orElseThrow(...)</code> — la manière propre de déballer un <code>Optional</code>. Si le livre existe, on l'obtient ; sinon, l'exception part.</li>
+  <li><code>existsByIsbn</code> avant la création — <strong>la règle métier</strong>. Elle est ici, dans le service, et nulle part ailleurs. Le contrôleur l'ignore ; le repository l'ignore.</li>
+  <li><code>new Livre(...)</code> — on construit l'entité avec l'objet <code>Categorie</code> complet, pas avec son identifiant. C'est le monde objet.</li>
+  <li><code>save(livre)</code> — l'<code>INSERT</code>. Après cet appel, <code>livre.getId()</code> contient le numéro attribué par PostgreSQL.</li>
+  <li><code>modifier</code> ne rappelle <strong>pas</strong> <code>save()</code>. Ce n'est pas un oubli : voir l'encadré suivant.</li>
+  <li><code>supprimer</code> vérifie l'existence avant de supprimer, pour pouvoir répondre <code>404</code> plutôt qu'un succès trompeur.</li>
+</ol>
+
+<div class="meta">
+<span class="lbl">Le chariot à la caisse</span>
+<p>Une <strong>transaction</strong>, c'est le chariot au moment de payer. Soit tout passe en caisse et vous repartez avec, soit un problème survient et vous reposez l'ensemble : on ne sort jamais du magasin avec la moitié des courses payées.</p>
+<p><code>@Transactional</code> pose ce chariot autour d'une méthode. Si une exception survient au milieu, tout ce qui a été écrit en base est annulé.</p>
+</div>
+
+<div class="box key">
+<span class="lbl">🎯 Pourquoi modifier() n'appelle pas save()</span>
+<p>Parce que pendant une transaction, Hibernate <strong>surveille</strong> les entités qu'il a chargées. À la fin de la méthode, il compare leur état à celui du chargement, repère les attributs modifiés, et émet l'<code>UPDATE</code> tout seul. On appelle cela le <strong>suivi des modifications</strong> <em class="en">(dirty checking)</em>.</p>
+<p>Écrire <code>save()</code> ici ne serait pas une faute — simplement inutile. Mais comprendre ce mécanisme vous évitera de chercher pendant une heure pourquoi une donnée a changé en base « toute seule ».</p>
+</div>
+
+<div class="box warn">
+<span class="lbl">⚠️ @Transactional(readOnly = true) au niveau de la classe</span>
+<p>C'est une bonne pratique : par défaut, tout est en lecture seule, ce qui permet à Hibernate d'optimiser. On lève ensuite explicitement la restriction sur les trois méthodes qui écrivent. Si vous oubliez le <code>@Transactional</code> sur <code>creer</code>, l'<code>INSERT</code> échouera — et vous saurez immédiatement pourquoi.</p>
+</div>
+
+<p>Ajoutez enfin la troisième exception, sur le même modèle que les deux premières :</p>
+
+<pre data-lang="Java"><span class="k">public class</span> <span class="t">CategorieIntrouvableException</span> <span class="k">extends</span> <span class="t">RuntimeException</span> {
+    <span class="k">public</span> <span class="f">CategorieIntrouvableException</span>(<span class="t">Long</span> id) {
+        <span class="k">super</span>(<span class="s">"Aucune catégorie avec l'identifiant "</span> + id);
+    }
+}</pre>
+</section>
+
+<section id="s8">
+<h2>Les DTO</h2>
+<p class="section-sub">Ce qui entre, ce qui sort. Jamais l'entité elle-même.</p>
+
+<div class="meta">
+<span class="lbl">La fiche photocopiée</span>
+<p>La fiche cartonnée de la réserve porte tout : le prix d'achat, le nom du fournisseur, la mention « exemplaire abîmé, à ne pas prêter ». Vous n'allez pas la tendre au lecteur qui vous demande un renseignement.</p>
+<p>Vous en faites une <strong>photocopie</strong> où ne figurent que le titre, l'auteur et l'année. C'est un <strong>DTO</strong>.</p>
+</div>
+
+<p>Créez le paquet <code>fr.bibliotheque.api.dto</code>. Nous utilisons des <strong><em class="en">records</em></strong> : une forme de classe Java, disponible depuis Java 16, faite pour transporter des données immuables. Une ligne remplace une trentaine.</p>
+
+<h3>Ce qui entre : les requêtes</h3>
+
+<pre data-lang="Java"><span class="k">package</span> fr.bibliotheque.api.dto;
+
+<span class="k">import</span> jakarta.validation.constraints.*;
+
+<span class="k">public record</span> <span class="t">CreerLivreRequete</span>(
+
+        <span class="k">@NotBlank</span>(message = <span class="s">"Le titre est obligatoire"</span>)
+        <span class="k">@Size</span>(max = <span class="n">200</span>, message = <span class="s">"200 caractères maximum"</span>)
+        <span class="t">String</span> titre,
+
+        <span class="k">@NotBlank</span>(message = <span class="s">"L'ISBN est obligatoire"</span>)
+        <span class="k">@Pattern</span>(regexp = <span class="s">"\\d{13}"</span>, message = <span class="s">"L'ISBN doit contenir 13 chiffres"</span>)
+        <span class="t">String</span> isbn,
+
+        <span class="k">@Min</span>(value = <span class="n">1450</span>, message = <span class="s">"Année invalide"</span>)
+        <span class="t">Integer</span> anneePublication,
+
+        <span class="k">@NotNull</span>(message = <span class="s">"La catégorie est obligatoire"</span>)
+        <span class="t">Long</span> idCategorie
+) { }</pre>
+
+<p><strong>Analysons ce code ligne par ligne :</strong></p>
+<ol>
+  <li><code>public record</code> — Java génère automatiquement le constructeur, les accesseurs (<code>titre()</code>, <code>isbn()</code>…), <code>equals</code>, <code>hashCode</code> et <code>toString</code>. Les champs sont définitifs : un DTO ne se modifie pas.</li>
+  <li>Les accesseurs s'appellent <code>titre()</code>, <strong>pas</strong> <code>getTitre()</code>. C'est la convention des <em>records</em>.</li>
+  <li><code>@NotBlank</code> — refuse <code>null</code>, la chaîne vide et les chaînes d'espaces. Pour les chaînes de caractères, préférez-le toujours à <code>@NotNull</code>.</li>
+  <li><code>@Pattern(regexp = "\\d{13}")</code> — exactement treize chiffres. Le double antislash est nécessaire : en Java, <code>\\d</code> dans le code source produit le <code>\d</code> de l'expression régulière.</li>
+  <li><code>@NotNull</code> sur <code>idCategorie</code> — ici c'est un <code>Long</code>, pas une chaîne : <code>@NotBlank</code> ne s'applique pas.</li>
+  <li>Chaque <code>message</code> sera renvoyé tel quel au client en cas d'erreur. Écrivez-les en français, ils sont lus par des humains.</li>
+  <li>Le DTO ne contient <strong>que ce qu'un client a le droit d'envoyer</strong>. Notez l'absence de <code>id</code> : le client ne choisit pas la clé primaire.</li>
+</ol>
+
+<p>Un second <em>record</em>, pour la modification :</p>
+
+<pre data-lang="Java"><span class="k">public record</span> <span class="t">ModifierLivreRequete</span>(
+
+        <span class="k">@NotBlank</span>(message = <span class="s">"Le titre est obligatoire"</span>)
+        <span class="k">@Size</span>(max = <span class="n">200</span>)
+        <span class="t">String</span> titre,
+
+        <span class="k">@Min</span>(value = <span class="n">1450</span>, message = <span class="s">"Année invalide"</span>)
+        <span class="t">Integer</span> anneePublication
+) { }</pre>
+
+<div class="box warn">
+<span class="lbl">⚠️ Pourquoi deux DTO différents ?</span>
+<p>Parce qu'on ne crée pas et on ne modifie pas les mêmes champs. À la création, l'ISBN et la catégorie sont obligatoires. À la modification, l'ISBN ne doit pas pouvoir changer — c'est l'identité commerciale de l'ouvrage. Un DTO unique vous obligerait à rendre tout facultatif, et vous perdriez la validation.</p>
+</div>
+
+<h3>Ce qui sort : la réponse</h3>
+
+<pre data-lang="Java"><span class="k">package</span> fr.bibliotheque.api.dto;
+
+<span class="k">import</span> fr.bibliotheque.api.entite.Livre;
+<span class="k">import</span> java.util.List;
+
+<span class="k">public record</span> <span class="t">LivreReponse</span>(
+        <span class="t">Long</span> id,
+        <span class="t">String</span> titre,
+        <span class="t">String</span> isbn,
+        <span class="t">Integer</span> anneePublication,
+        <span class="t">String</span> categorie,
+        <span class="t">List</span>&lt;<span class="t">String</span>&gt; auteurs
+) {
+
+    <span class="c">// Fabrique : transforme une entité en réponse</span>
+    <span class="k">public static</span> <span class="t">LivreReponse</span> <span class="f">depuis</span>(<span class="t">Livre</span> livre) {
+        <span class="k">return new</span> <span class="t">LivreReponse</span>(
+                livre.<span class="f">getId</span>(),
+                livre.<span class="f">getTitre</span>(),
+                livre.<span class="f">getIsbn</span>(),
+                livre.<span class="f">getAnneePublication</span>(),
+                livre.<span class="f">getCategorie</span>().<span class="f">getLibelle</span>(),      <span class="c">// on aplatit</span>
+                livre.<span class="f">getAuteurs</span>().<span class="f">stream</span>()
+                     .<span class="f">map</span>(a -&gt; a.<span class="f">getPrenom</span>() + <span class="s">" "</span> + a.<span class="f">getNom</span>())
+                     .<span class="f">toList</span>()
+        );
+    }
+}</pre>
+
+<p><strong>Analysons ce code ligne par ligne :</strong></p>
+<ol>
+  <li><code>String categorie</code> — pas <code>Categorie categorie</code>. On <strong>aplatit</strong> : le client reçoit <code>"Roman"</code>, pas un objet imbriqué avec un identifiant technique. La réponse JSON en devient beaucoup plus lisible.</li>
+  <li><code>List&lt;String&gt; auteurs</code> — même principe : une liste de noms formatés, pas des objets <code>Auteur</code>.</li>
+  <li><code>public static LivreReponse depuis(Livre)</code> — une <strong>fabrique</strong>. Le code de conversion vit à un seul endroit ; le contrôleur écrira simplement <code>LivreReponse.depuis(livre)</code>.</li>
+  <li><code>livre.getCategorie().getLibelle()</code> — cet appel ne fonctionne que parce que le repository a utilisé <code>join fetch</code>. Sans lui : <code>LazyInitializationException</code>. Tout se tient.</li>
+  <li><code>.stream().map(...).toList()</code> — on parcourt le <code>Set&lt;Auteur&gt;</code> et on produit une liste de chaînes.</li>
+</ol>
+
+<div class="box key">
+<span class="lbl">🎯 La règle absolue</span>
+<p><strong>Une entité ne sort jamais du contrôleur, et n'y entre jamais.</strong> Le DTO est la frontière. C'est ce qui vous permet d'ajouter demain un champ « prix d'achat » dans <code>Livre</code> sans le publier accidentellement sur Internet.</p>
+</div>
+</section>
+
+<section id="s9">
+<h2>Le contrôleur REST</h2>
+<p class="section-sub">Le guichet. Cinq méthodes, et l'API existe.</p>
+
+<div class="meta">
+<span class="lbl">Le guichet d'accueil</span>
+<p>Le lecteur arrive au guichet. L'agent ne cherche pas les livres lui-même et ne connaît pas le règlement par cœur : il <strong>écoute la demande</strong>, la transmet au bibliothécaire, et rend la réponse.</p>
+<p>Son métier est la traduction : transformer une demande venue de l'extérieur en appel interne, et l'inverse.</p>
+</div>
+
+<p>Créez le paquet <code>fr.bibliotheque.api.controleur</code> :</p>
+
+<pre data-lang="Java"><span class="k">package</span> fr.bibliotheque.api.controleur;
+
+<span class="k">import</span> fr.bibliotheque.api.dto.*;
+<span class="k">import</span> fr.bibliotheque.api.entite.Livre;
+<span class="k">import</span> fr.bibliotheque.api.service.LivreService;
+<span class="k">import</span> jakarta.validation.Valid;
+<span class="k">import</span> org.springframework.http.HttpStatus;
+<span class="k">import</span> org.springframework.http.ResponseEntity;
+<span class="k">import</span> org.springframework.web.bind.annotation.*;
+
+<span class="k">import</span> java.net.URI;
+<span class="k">import</span> java.util.List;
+
+<span class="k">@RestController</span>
+<span class="k">@RequestMapping</span>(<span class="s">"/api/v1/livres"</span>)      <span class="c">// préfixe commun aux 5 adresses</span>
+<span class="k">public class</span> <span class="t">LivreController</span> {
+
+    <span class="k">private final</span> <span class="t">LivreService</span> service;
+
+    <span class="k">public</span> <span class="f">LivreController</span>(<span class="t">LivreService</span> service) {
+        <span class="k">this</span>.service = service;
+    }
+
+    <span class="c">// ── GET /api/v1/livres ─────────────────────────────────</span>
+    <span class="k">@GetMapping</span>
+    <span class="k">public</span> <span class="t">List</span>&lt;<span class="t">LivreReponse</span>&gt; <span class="f">lister</span>() {
+        <span class="k">return</span> service.<span class="f">lister</span>().<span class="f">stream</span>()
+                      .<span class="f">map</span>(<span class="t">LivreReponse</span>::<span class="f">depuis</span>)
+                      .<span class="f">toList</span>();
+    }
+
+    <span class="c">// ── GET /api/v1/livres/42 ──────────────────────────────</span>
+    <span class="k">@GetMapping</span>(<span class="s">"/{id}"</span>)
+    <span class="k">public</span> <span class="t">LivreReponse</span> <span class="f">detail</span>(<span class="k">@PathVariable</span> <span class="t">Long</span> id) {
+        <span class="k">return</span> <span class="t">LivreReponse</span>.<span class="f">depuis</span>(service.<span class="f">trouverParId</span>(id));
+    }
+
+    <span class="c">// ── POST /api/v1/livres ────────────────────────────────</span>
+    <span class="k">@PostMapping</span>
+    <span class="k">public</span> <span class="t">ResponseEntity</span>&lt;<span class="t">LivreReponse</span>&gt; <span class="f">creer</span>(
+            <span class="k">@Valid @RequestBody</span> <span class="t">CreerLivreRequete</span> requete) {
+
+        <span class="t">Livre</span> cree = service.<span class="f">creer</span>(
+                requete.<span class="f">titre</span>(),
+                requete.<span class="f">isbn</span>(),
+                requete.<span class="f">anneePublication</span>(),
+                requete.<span class="f">idCategorie</span>());
+
+        <span class="k">return</span> <span class="t">ResponseEntity</span>
+                .<span class="f">created</span>(<span class="t">URI</span>.<span class="f">create</span>(<span class="s">"/api/v1/livres/"</span> + cree.<span class="f">getId</span>()))
+                .<span class="f">body</span>(<span class="t">LivreReponse</span>.<span class="f">depuis</span>(cree));
+    }
+
+    <span class="c">// ── PUT /api/v1/livres/42 ──────────────────────────────</span>
+    <span class="k">@PutMapping</span>(<span class="s">"/{id}"</span>)
+    <span class="k">public</span> <span class="t">LivreReponse</span> <span class="f">modifier</span>(
+            <span class="k">@PathVariable</span> <span class="t">Long</span> id,
+            <span class="k">@Valid @RequestBody</span> <span class="t">ModifierLivreRequete</span> requete) {
+
+        <span class="k">return</span> <span class="t">LivreReponse</span>.<span class="f">depuis</span>(
+                service.<span class="f">modifier</span>(id, requete.<span class="f">titre</span>(), requete.<span class="f">anneePublication</span>()));
+    }
+
+    <span class="c">// ── DELETE /api/v1/livres/42 ───────────────────────────</span>
+    <span class="k">@DeleteMapping</span>(<span class="s">"/{id}"</span>)
+    <span class="k">@ResponseStatus</span>(<span class="t">HttpStatus</span>.NO_CONTENT)     <span class="c">// 204</span>
+    <span class="k">public void</span> <span class="f">supprimer</span>(<span class="k">@PathVariable</span> <span class="t">Long</span> id) {
+        service.<span class="f">supprimer</span>(id);
+    }
+}</pre>
+
+<p><strong>Analysons ce code ligne par ligne :</strong></p>
+
+<div class="tw">
+<table>
+<thead><tr><th>Élément</th><th>Ce qu'il fait</th></tr></thead>
+<tbody>
+<tr><td><code>@RestController</code></td><td>Deux choses à la fois : déclare la classe au conteneur, et indique que chaque valeur renvoyée doit être <strong>convertie en JSON</strong> et écrite directement dans la réponse HTTP</td></tr>
+<tr><td><code>@RequestMapping("/api/v1/livres")</code></td><td>Le préfixe commun. Les cinq méthodes s'y ajoutent. Notez le <code>v1</code> : le versionnement de l'API, dès le premier jour</td></tr>
+<tr><td><code>@GetMapping</code> (sans argument)</td><td>Répond sur l'adresse du préfixe exactement : <code>GET /api/v1/livres</code></td></tr>
+<tr><td><code>@GetMapping("/{id}")</code></td><td>Les accolades désignent une <strong>partie variable</strong> de l'adresse</td></tr>
+<tr><td><code>@PathVariable Long id</code></td><td>Récupère cette partie variable et la convertit en <code>Long</code>. Si le client envoie <code>/livres/abc</code>, Spring répond <code>400</code> tout seul</td></tr>
+<tr><td><code>@RequestBody</code></td><td>Prend le JSON du corps de la requête et fabrique le <em>record</em> correspondant. C'est la <strong>désérialisation</strong></td></tr>
+<tr><td><code>@Valid</code></td><td>Déclenche le contrôle des annotations du DTO <strong>avant</strong> d'entrer dans la méthode. En cas d'échec, le corps de la méthode n'est jamais exécuté</td></tr>
+<tr><td><code>ResponseEntity</code></td><td>À utiliser quand vous devez maîtriser le code de statut ou les en-têtes. Sinon, renvoyez directement l'objet : Spring répondra <code>200</code></td></tr>
+<tr><td><code>.created(URI...)</code></td><td>Produit un <code>201 Created</code> <strong>et</strong> l'en-tête <code>Location</code> qui indique où trouver la ressource créée. C'est la réponse correcte à un <code>POST</code></td></tr>
+<tr><td><code>@ResponseStatus(NO_CONTENT)</code></td><td>Force le <code>204</code>. La méthode renvoie <code>void</code> : une suppression réussie n'a rien à raconter</td></tr>
+<tr><td><code>LivreReponse::depuis</code></td><td>Une <strong>référence de méthode</strong> : la façon courte d'écrire <code>livre -&gt; LivreReponse.depuis(livre)</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+<span class="lbl">🎯 Regardez ce que ce contrôleur ne fait pas</span>
+<p>Aucun <code>if</code>. Aucun calcul. Aucun SQL. Aucune règle. Cinq méthodes de trois à six lignes, qui traduisent et délèguent. <strong>Si votre contrôleur grossit, c'est que du métier s'y est glissé.</strong> C'est le meilleur indicateur de santé de votre architecture.</p>
+</div>
+
+<div class="box warn">
+<span class="lbl">⚠️ @RestController et @Controller ne sont pas la même chose</span>
+<p><code>@Controller</code>, utilisé seul, fait que la valeur renvoyée est interprétée comme un <strong>nom de vue</strong> à afficher — c'est le MVC côté serveur qui rend du HTML. <code>@RestController</code> équivaut à <code>@Controller</code> + <code>@ResponseBody</code> : la valeur renvoyée <em>est</em> le corps de la réponse. Si votre API renvoie <code>404</code> avec un message parlant de vue introuvable, vous avez oublié le <code>Rest</code>.</p>
+</div>
+</section>
+
+<section id="s10">
+<h2>La gestion des erreurs</h2>
+<p class="section-sub">Traduire les exceptions métier en codes HTTP. Une classe, et c'est réglé pour toute l'application.</p>
+
+<div class="meta">
+<span class="lbl">Le service des réclamations</span>
+<p>Quand quelque chose se passe mal au guichet, l'agent n'improvise pas. Il transmet au <strong>service des réclamations</strong>, un bureau unique qui sait répondre poliment à chaque type d'incident, toujours de la même manière.</p>
+</div>
+
+<p>En l'état, une exception non traitée produit un <code>500 Internal Server Error</code> — le code qui signifie « c'est notre faute ». Or un livre introuvable n'est pas notre faute : c'est un <code>404</code>. Corrigeons cela.</p>
+
+<pre data-lang="Java"><span class="k">package</span> fr.bibliotheque.api.erreur;
+
+<span class="k">import</span> org.springframework.http.HttpStatus;
+<span class="k">import</span> org.springframework.web.bind.MethodArgumentNotValidException;
+<span class="k">import</span> org.springframework.web.bind.annotation.*;
+
+<span class="k">import</span> java.util.HashMap;
+<span class="k">import</span> java.util.Map;
+
+<span class="k">@RestControllerAdvice</span>          <span class="c">// « je surveille TOUS les contrôleurs »</span>
+<span class="k">public class</span> <span class="t">GestionnaireErreurs</span> {
+
+    <span class="c">// 404 — la ressource n'existe pas</span>
+    <span class="k">@ExceptionHandler</span>({<span class="t">LivreIntrouvableException</span>.<span class="k">class</span>,
+                       <span class="t">CategorieIntrouvableException</span>.<span class="k">class</span>})
+    <span class="k">@ResponseStatus</span>(<span class="t">HttpStatus</span>.NOT_FOUND)
+    <span class="k">public</span> <span class="t">Map</span>&lt;<span class="t">String</span>, <span class="t">String</span>&gt; <span class="f">introuvable</span>(<span class="t">RuntimeException</span> e) {
+        <span class="k">return</span> <span class="t">Map</span>.<span class="f">of</span>(<span class="s">"erreur"</span>, e.<span class="f">getMessage</span>());
+    }
+
+    <span class="c">// 409 — conflit avec l'existant</span>
+    <span class="k">@ExceptionHandler</span>(<span class="t">IsbnDejaUtiliseException</span>.<span class="k">class</span>)
+    <span class="k">@ResponseStatus</span>(<span class="t">HttpStatus</span>.CONFLICT)
+    <span class="k">public</span> <span class="t">Map</span>&lt;<span class="t">String</span>, <span class="t">String</span>&gt; <span class="f">conflit</span>(<span class="t">RuntimeException</span> e) {
+        <span class="k">return</span> <span class="t">Map</span>.<span class="f">of</span>(<span class="s">"erreur"</span>, e.<span class="f">getMessage</span>());
+    }
+
+    <span class="c">// 400 — les données envoyées sont invalides</span>
+    <span class="k">@ExceptionHandler</span>(<span class="t">MethodArgumentNotValidException</span>.<span class="k">class</span>)
+    <span class="k">@ResponseStatus</span>(<span class="t">HttpStatus</span>.BAD_REQUEST)
+    <span class="k">public</span> <span class="t">Map</span>&lt;<span class="t">String</span>, <span class="t">String</span>&gt; <span class="f">invalide</span>(<span class="t">MethodArgumentNotValidException</span> e) {
+        <span class="t">Map</span>&lt;<span class="t">String</span>, <span class="t">String</span>&gt; erreurs = <span class="k">new</span> <span class="t">HashMap</span>&lt;&gt;();
+        e.<span class="f">getBindingResult</span>().<span class="f">getFieldErrors</span>()
+         .<span class="f">forEach</span>(err -&gt; erreurs.<span class="f">put</span>(err.<span class="f">getField</span>(),
+                                     err.<span class="f">getDefaultMessage</span>()));
+        <span class="k">return</span> erreurs;
+    }
+}</pre>
+
+<p><strong>Analysons ce code ligne par ligne :</strong></p>
+<ol>
+  <li><code>@RestControllerAdvice</code> — cette classe intercepte les exceptions de <strong>tous</strong> les contrôleurs de l'application. Vous l'écrivez une fois ; elle vaut pour les contrôleurs que vous ajouterez demain.</li>
+  <li><code>@ExceptionHandler({A.class, B.class})</code> — « quand l'une de ces exceptions remonte, exécute cette méthode ». Deux exceptions ici, car elles méritent le même traitement.</li>
+  <li><code>@ResponseStatus(HttpStatus.NOT_FOUND)</code> — le code renvoyé. C'est <strong>ici</strong>, et nulle part ailleurs, que le métier est traduit en HTTP.</li>
+  <li><code>Map.of("erreur", e.getMessage())</code> — un petit dictionnaire, converti en <code>{"erreur": "Aucun livre avec l'identifiant 99"}</code>.</li>
+  <li><code>MethodArgumentNotValidException</code> — l'exception que Spring lève quand <code>@Valid</code> échoue. Elle n'est pas à vous : elle vient du framework.</li>
+  <li><code>getBindingResult().getFieldErrors()</code> — la liste des champs fautifs. On les transforme en dictionnaire champ → message, pour que le client sache exactement quoi corriger.</li>
+</ol>
+
+<div class="tw">
+<table>
+<thead><tr><th>Situation</th><th>Exception levée par</th><th>Réponse</th></tr></thead>
+<tbody>
+<tr><td><code>GET /livres/999</code> inexistant</td><td>Le service</td><td><code>404</code> + message</td></tr>
+<tr><td><code>POST</code> avec un ISBN déjà pris</td><td>Le service</td><td><code>409</code> + message</td></tr>
+<tr><td><code>POST</code> avec un titre vide</td><td>Spring (<code>@Valid</code>)</td><td><code>400</code> + liste des champs</td></tr>
+<tr><td>Base de données arrêtée</td><td>Hibernate</td><td><code>500</code> — et c'est correct</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box tip">
+<span class="lbl">💡 Pour aller plus loin : ProblemDetail</span>
+<p>Spring propose depuis la version 6 une classe <code>ProblemDetail</code>, qui met en forme les erreurs selon un format normalisé (RFC 9457) : type, titre, statut, détail, instance. C'est ce qu'on utilise en production, car les clients savent le lire sans documentation. Le <code>Map</code> suffit pour ce TP ; retenez le nom.</p>
+</div>
+
+<div class="box warn">
+<span class="lbl">⚠️ Ne mettez pas de try/catch dans le contrôleur</span>
+<p>La tentation est d'entourer chaque appel de service d'un <code>try/catch</code> pour renvoyer le bon code. Vous obtiendriez cinq blocs identiques, puis dix, puis cinquante. Laissez l'exception remonter : c'est précisément le rôle du <code>@RestControllerAdvice</code> de l'attraper.</p>
+</div>
+</section>
+
+<section id="s11">
+<h2>Tester l'API</h2>
+<p class="section-sub">Le moment où tout s'allume.</p>
+
+<h3>D'abord, quelques données</h3>
+
+<p>Votre table <code>categorie</code> est vide, et un livre exige une catégorie. Insérez-en trois directement en SQL :</p>
+
+<pre data-lang="SQL"><span class="k">INSERT INTO</span> categorie (libelle) <span class="k">VALUES</span>
+    (<span class="s">'Roman'</span>), (<span class="s">'Policier'</span>), (<span class="s">'Science-fiction'</span>);
+
+<span class="k">SELECT</span> * <span class="k">FROM</span> categorie;   <span class="c">-- notez les identifiants obtenus</span></pre>
+
+<p>Relancez l'application, puis ouvrez un terminal.</p>
+
+<h3>Les cinq opérations</h3>
+
+<pre data-lang="Terminal"><span class="c"># ── CREATE ────────────────────────────────────────────────</span>
+curl -X POST http://localhost:8080/api/v1/livres \
+  -H <span class="s">"Content-Type: application/json"</span> \
+  -d <span class="s">'{
+        "titre": "Le Nom de la rose",
+        "isbn": "9782253033134",
+        "anneePublication": 1980,
+        "idCategorie": 1
+      }'</span>
+
+<span class="c"># → 201 Created</span>
+<span class="c"># → Location: /api/v1/livres/1</span>
+<span class="c"># → {"id":1,"titre":"Le Nom de la rose","isbn":"9782253033134",</span>
+<span class="c">#    "anneePublication":1980,"categorie":"Roman","auteurs":[]}</span></pre>
+
+<pre data-lang="Terminal"><span class="c"># ── READ · la liste ───────────────────────────────────────</span>
+curl http://localhost:8080/api/v1/livres
+
+<span class="c"># ── READ · un seul ────────────────────────────────────────</span>
+curl http://localhost:8080/api/v1/livres/1
+
+<span class="c"># ── UPDATE ────────────────────────────────────────────────</span>
+curl -X PUT http://localhost:8080/api/v1/livres/1 \
+  -H <span class="s">"Content-Type: application/json"</span> \
+  -d <span class="s">'{ "titre": "Le Nom de la rose (édition revue)",
+        "anneePublication": 1982 }'</span>
+
+<span class="c"># ── DELETE ────────────────────────────────────────────────</span>
+curl -i -X DELETE http://localhost:8080/api/v1/livres/1
+<span class="c"># → HTTP/1.1 204 No Content, sans corps</span></pre>
+
+<h3>Et surtout : les cas d'erreur</h3>
+
+<p>Une API ne se teste pas seulement quand tout va bien. Vérifiez les trois refus :</p>
+
+<pre data-lang="Terminal"><span class="c"># 404 — le livre n'existe pas</span>
+curl -i http://localhost:8080/api/v1/livres/9999
+<span class="c"># → 404  {"erreur":"Aucun livre avec l'identifiant 9999"}</span>
+
+<span class="c"># 409 — ISBN déjà référencé (rejouez le POST à l'identique)</span>
+<span class="c"># → 409  {"erreur":"L'ISBN 9782253033134 est déjà référencé"}</span>
+
+<span class="c"># 400 — données invalides</span>
+curl -i -X POST http://localhost:8080/api/v1/livres \
+  -H <span class="s">"Content-Type: application/json"</span> \
+  -d <span class="s">'{ "titre": "", "isbn": "123", "idCategorie": 1 }'</span>
+<span class="c"># → 400  {"titre":"Le titre est obligatoire",</span>
+<span class="c">#         "isbn":"L'ISBN doit contenir 13 chiffres"}</span></pre>
+
+<div class="box key">
+<span class="lbl">🎯 Si ces trois erreurs répondent correctement</span>
+<p>Votre API est correcte. Beaucoup de projets d'étudiants renvoient <code>200</code> partout, ou <code>500</code> dès qu'un identifiant est faux. Vous, non : chaque situation a son code, et le client sait quoi en faire.</p>
+</div>
+
+<div class="box tip">
+<span class="lbl">💡 Regardez la console pendant les tests</span>
+<p>Avec <code>show-sql=true</code>, chaque requête HTTP fait défiler le SQL correspondant. C'est votre meilleur outil d'apprentissage : vous voyez <em>exactement</em> ce que l'ORM écrit à votre place. Vérifiez notamment qu'un <code>GET /livres</code> ne produit qu'<strong>une seule</strong> requête, grâce au <code>join fetch</code>.</p>
+</div>
+
+<div class="box tip">
+<span class="lbl">💡 Alternatives à curl</span>
+<p>Sous Windows, PowerShell interprète différemment les guillemets. Plus confortable : <strong>Postman</strong>, ou un fichier <code>requetes.http</code> directement dans IntelliJ — vous cliquez sur une flèche verte à côté de chaque requête, et vous versionnez vos tests avec le code.</p>
+</div>
+</section>
+
+<section id="s12">
+<h2>Récapitulatif</h2>
+<p class="section-sub">Neuf fichiers, et une API complète.</p>
+
+<pre data-lang="Arborescence"><span class="c"># Ce que vous avez écrit</span>
+fr/bibliotheque/api/
+├── ApiApplication.java              <span class="c"># fourni — démarre tout</span>
+│
+├── entite/
+│   ├── Categorie.java               <span class="c"># @Entity — la table categorie</span>
+│   ├── Auteur.java                  <span class="c"># @Entity — la table auteur</span>
+│   └── Livre.java                   <span class="c"># @Entity + les 2 relations</span>
+│
+├── repository/
+│   ├── CategorieRepository.java     <span class="c"># 1 ligne</span>
+│   ├── AuteurRepository.java        <span class="c"># 1 ligne</span>
+│   └── LivreRepository.java         <span class="c"># + 4 requêtes sur mesure</span>
+│
+├── service/
+│   └── LivreService.java            <span class="c"># @Service — LES RÈGLES</span>
+│
+├── dto/
+│   ├── CreerLivreRequete.java       <span class="c"># ce qui entre, validé</span>
+│   ├── ModifierLivreRequete.java    <span class="c"># ce qui entre, validé</span>
+│   └── LivreReponse.java            <span class="c"># ce qui sort</span>
+│
+├── controleur/
+│   └── LivreController.java         <span class="c"># @RestController — 5 adresses</span>
+│
+└── erreur/
+    ├── LivreIntrouvableException.java
+    ├── CategorieIntrouvableException.java
+    ├── IsbnDejaUtiliseException.java
+    └── GestionnaireErreurs.java     <span class="c"># @RestControllerAdvice — 404/409/400</span></pre>
+
+<figure>
+<div class="fig-scroll">
+<svg viewBox="0 0 800 434" role="img" aria-labelledby="fa3">
+<title id="fa3">Le trajet d'une requête POST à travers les fichiers écrits pendant le TP</title>
+<defs><marker id="b3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#4c8b2b"/></marker>
+<marker id="b3g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#b5b0aa"/></marker></defs>
+
+<text class="t-tag" x="256" y="18" text-anchor="end">VOTRE FICHIER</text>
+<text class="t-tag" x="546" y="18">CE QUI S'Y PASSE</text>
+
+<rect class="bx" x="268" y="28" width="264" height="52" rx="5"/>
+<text class="t-ttl" x="400" y="50" text-anchor="middle">1 · Requête</text>
+<text class="t-mono" x="400" y="69" text-anchor="middle">POST /api/v1/livres</text>
+<text class="t-sm" x="256" y="59" text-anchor="end">— (le client)</text>
+<text class="t-sm" x="546" y="59">du JSON arrive sur le réseau</text>
+
+<line class="ln-a" x1="400" y1="82" x2="400" y2="102" marker-end="url(#b3)"/>
+
+<rect class="bx-a" x="268" y="104" width="264" height="52" rx="5"/>
+<text class="t-ttl" x="400" y="126" text-anchor="middle">2 · Contrôleur</text>
+<text class="t-sm" x="400" y="145" text-anchor="middle">traduit, ne décide pas</text>
+<text class="t-mono" x="256" y="135" text-anchor="end">LivreController.java</text>
+<text class="t-sm" x="546" y="128">@RequestBody fabrique le DTO,</text>
+<text class="t-sm" x="546" y="144">@Valid le contrôle</text>
+
+<line class="ln-a" x1="400" y1="158" x2="400" y2="178" marker-end="url(#b3)"/>
+
+<rect class="bx-o" x="268" y="180" width="264" height="52" rx="5"/>
+<text class="t-ttl" x="400" y="202" text-anchor="middle">3 · Service</text>
+<text class="t-sm" x="400" y="221" text-anchor="middle">décide</text>
+<text class="t-mono" x="256" y="211" text-anchor="end">LivreService.java</text>
+<text class="t-sm" x="546" y="204">ISBN déjà pris ? catégorie</text>
+<text class="t-sm" x="546" y="220">existante ? transaction ouverte</text>
+
+<line class="ln-a" x1="400" y1="234" x2="400" y2="254" marker-end="url(#b3)"/>
+
+<rect class="bx-g" x="268" y="256" width="264" height="52" rx="5"/>
+<text class="t-ttl" x="400" y="278" text-anchor="middle">4 · Repository</text>
+<text class="t-sm" x="400" y="297" text-anchor="middle">range, ne décide pas</text>
+<text class="t-mono" x="256" y="287" text-anchor="end">LivreRepository.java</text>
+<text class="t-sm" x="546" y="280">save() — Hibernate rédige</text>
+<text class="t-sm" x="546" y="296">le SQL à votre place</text>
+
+<line class="ln-a" x1="400" y1="310" x2="400" y2="330" marker-end="url(#b3)"/>
+
+<rect class="bx-d" x="268" y="332" width="264" height="52" rx="5"/>
+<text class="t-ttl" x="400" y="354" text-anchor="middle" fill="#ffffff">5 · PostgreSQL</text>
+<text class="t-sm" x="400" y="373" text-anchor="middle" fill="#ffffff">INSERT INTO livre ...</text>
+<text class="t-mono" x="256" y="363" text-anchor="end">(la base)</text>
+<text class="t-sm" x="546" y="365">la ligne existe, id attribué</text>
+
+<path class="ln-dash" d="M268 358 L180 358 L180 54 L264 54" marker-end="url(#b3g)"/>
+<text class="t-sm" x="166" y="206" text-anchor="middle" transform="rotate(-90 166 206)">201 Created + LivreReponse en JSON</text>
+</svg>
+</div>
+<figcaption>Le même trajet qu'à la séance précédente — mais cette fois, chaque étage porte le nom d'un fichier que vous avez écrit.</figcaption>
+</figure>
+
+<div class="tw">
+<table>
+<thead><tr><th>Couche</th><th>Annotation</th><th>Sa seule question</th><th>Ce qu'elle ne fait jamais</th></tr></thead>
+<tbody>
+<tr><td>Entité</td><td><code>@Entity</code></td><td>« À quoi ressemble la donnée ? »</td><td>Aucune logique, aucun accès réseau</td></tr>
+<tr><td>Repository</td><td>&mdash; (interface)</td><td>« Comment je la range ? »</td><td>Aucune règle métier</td></tr>
+<tr><td>Service</td><td><code>@Service</code></td><td>« Ai-je le droit ? »</td><td>Aucun code HTTP, aucun JSON</td></tr>
+<tr><td>DTO</td><td>&mdash; (<em>record</em>)</td><td>« Que puis-je montrer ? »</td><td>Aucun comportement</td></tr>
+<tr><td>Contrôleur</td><td><code>@RestController</code></td><td>« Comment je traduis ? »</td><td>Aucune décision métier</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section id="s13">
+<h2>À vous de jouer</h2>
+<p class="section-sub">Trois exercices, du plus simple au plus complet.</p>
+
+<div class="panel">
+<p class="panel-title">Exercice 1 · le CRUD des auteurs</p>
+<p style="margin:0">Refaites exactement le même parcours pour <code>Auteur</code> : DTO, service, contrôleur sur <code>/api/v1/auteurs</code>. Aucune notion nouvelle. Chronométrez-vous : la deuxième fois doit prendre trois fois moins de temps que la première.</p>
+</div>
+
+<div class="panel">
+<p class="panel-title">Exercice 2 · rattacher un auteur à un livre</p>
+<p style="margin:0">Ajoutez l'adresse <code>POST /api/v1/livres/{id}/auteurs/{idAuteur}</code> qui associe un auteur existant à un livre existant. Deux questions à trancher : quel code de statut renvoyer, et que faire si l'association existe déjà ? Indice : la méthode <code>ajouterAuteur</code> de l'entité existe déjà, et le <code>Set</code> vous protège des doublons.</p>
+</div>
+
+<div class="panel">
+<p class="panel-title">Exercice 3 · les emprunts</p>
+<p style="margin:0">Implémentez <code>Adherent</code> et <code>Emprunt</code>, la partie du MCD laissée de côté. <code>EMPRUNTER</code> porte des attributs : elle devient donc une entité à part entière, avec deux <code>@ManyToOne</code>. Règles métier à placer dans le service : on ne peut pas emprunter un livre déjà emprunté et non rendu, et un adhérent ne peut pas avoir plus de trois emprunts en cours. Ces deux règles vont dans le service — nulle part ailleurs.</p>
+</div>
+
+<div class="box tip">
+<span class="lbl">💡 Le réflexe à installer</span>
+<p>Devant chaque nouvelle ligne, posez-vous la question du placement : <strong>traduction</strong> (contrôleur), <strong>décision</strong> (service) ou <strong>rangement</strong> (repository) ? Si vous hésitez, c'est presque toujours une décision : mettez-la dans le service.</p>
+</div>
+</section>
+
+<section id="s14">
+<h2>Les pièges du premier CRUD</h2>
+<p class="section-sub">Les erreurs que vous allez rencontrer, et leur cause exacte.</p>
+
+<div class="tw">
+<table>
+<thead><tr><th>Le message</th><th>La cause</th><th>Le remède</th></tr></thead>
+<tbody>
+<tr><td><em>No default constructor for entity</em></td><td>Vous avez ajouté un constructeur avec paramètres, ce qui supprime le constructeur vide</td><td>Ajouter <code>protected MaClasse() { }</code></td></tr>
+<tr><td><em>LazyInitializationException</em></td><td>Accès à une relation <code>LAZY</code> après la fin de la transaction</td><td><code>join fetch</code> dans la requête du repository</td></tr>
+<tr><td><em>Table "livre" does not exist</em></td><td><code>ddl-auto</code> absent, ou mauvaise base dans l'URL</td><td>Vérifier <code>application.properties</code></td></tr>
+<tr><td>Réponse <code>404</code> sur une adresse pourtant écrite</td><td>Le contrôleur est hors du paquet racine, ou <code>@RestController</code> oublié</td><td>Ranger sous <code>fr.bibliotheque.api</code></td></tr>
+<tr><td>Réponse <code>200</code> avec du HTML d'erreur</td><td><code>@Controller</code> au lieu de <code>@RestController</code></td><td>Ajouter le <code>Rest</code></td></tr>
+<tr><td><em>Could not resolve property : titre</em></td><td>Faute de frappe dans un nom de méthode déduite</td><td>Comparer au nom exact de l'attribut de l'entité</td></tr>
+<tr><td>Le JSON boucle à l'infini</td><td>Relation bidirectionnelle sérialisée directement</td><td>Passer par un DTO — jamais l'entité</td></tr>
+<tr><td>101 requêtes SQL pour 100 livres</td><td>Problème N+1 : pas de <code>join fetch</code></td><td>Charger explicitement les relations</td></tr>
+<tr><td><code>@Valid</code> semble ignoré</td><td>Annotation oubliée devant <code>@RequestBody</code></td><td>Écrire <code>@Valid @RequestBody</code></td></tr>
+<tr><td>La modification n'est pas enregistrée</td><td><code>@Transactional</code> manquant sur la méthode d'écriture</td><td>L'ajouter — le suivi des modifications en dépend</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+<span class="lbl">🎯 Les trois phrases de ce TP</span>
+<p><strong>1.</strong> L'entité décrit la table ; le DTO décrit ce qu'on montre ; on ne les confond jamais.<br>
+<strong>2.</strong> Le contrôleur traduit, le service décide, le repository range.<br>
+<strong>3.</strong> Toute règle métier vit dans le service — et nulle part ailleurs.</p>
+</div>
+
+<div class="box recall">
+<span class="lbl">📝 Ce que vous avez ajouté à votre bagage</span>
+<p>Spring Initializr, le <code>pom.xml</code> et Maven, les entités JPA et leurs relations, les repositories Spring Data, la couche service et les transactions, les DTO et la validation, le contrôleur REST et les codes de statut, et la gestion centralisée des erreurs. C'est le socle de la quasi-totalité des applications Java d'entreprise.</p>
+</div>
+</section>
+
+<footer class="end">
+<p>TP guidé — Premier CRUD avec Spring Boot 4.1 · Formation Bac → Bac+3<br>
+Prochaine séance : les tests automatisés, et la sécurisation de l'API.</p>
+</footer>
+
+</main>
+</div>
+
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+  var sections = links.map(function (a) { return document.querySelector(a.getAttribute('href')); });
+  var toc = document.querySelector('.toc');
+
+  function surligner() {
+    var courant = 0;
+    for (var i = 0; i < sections.length; i++) {
+      if (sections[i] && sections[i].getBoundingClientRect().top <= 90) { courant = i; }
+    }
+    links.forEach(function (a, i) { a.classList.toggle('on', i === courant); });
+  }
+
+  var enAttente = false;
+  window.addEventListener('scroll', function () {
+    if (enAttente) { return; }
+    enAttente = true;
+    window.requestAnimationFrame(function () { surligner(); enAttente = false; });
+  }, { passive: true });
+
+  links.forEach(function (a) {
+    a.addEventListener('click', function () {
+      if (window.innerWidth <= 980) { toc.removeAttribute('open'); }
+    });
+  });
+
+  surligner();
+})();
+</script>
+</body>
+</html>
