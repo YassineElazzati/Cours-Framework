@@ -1680,7 +1680,7 @@ curl -i -X POST http://localhost:8080/api/v1/livres \
 <p>Avec <code>show-sql=true</code>, chaque requête HTTP fait défiler le SQL correspondant. C'est votre meilleur outil d'apprentissage : vous voyez <em>exactement</em> ce que l'ORM écrit à votre place. Vérifiez notamment qu'un <code>GET /livres</code> ne produit qu'<strong>une seule</strong> requête, grâce au <code>join fetch</code>.</p>
 </div>
 
-<h3>Tester avec Postman, pas à pas</h3>
+<h3 id="postman">Tester avec Postman, pas à pas</h3>
 
 <p>curl est parfait pour comprendre, mais taper du JSON dans un terminal devient vite pénible — surtout sous Windows, où PowerShell interprète les guillemets à sa façon. <strong>Postman</strong> est l'outil standard du métier pour tester une API : une interface graphique où chaque requête est un formulaire qu'on remplit une fois et qu'on rejoue à volonté.</p>
 
@@ -2020,9 +2020,16 @@ fr/bibliotheque/api/
 
 <li><label><input type="checkbox">
 <span class="step-body"><span class="step-tag"></span>
-<strong>Testez tout : les 5 opérations ET les cas d'erreur</strong>
-<p>Insérez les données de départ (catégories, auteurs), puis déroulez les 5 opérations CRUD avec curl ou Postman. Terminez par les 3 cas d'erreur : 404, 409, 400. Gardez un œil sur la console : chaque requête HTTP doit faire défiler son SQL.</p>
-<p class="step-ref">📖 Inspirez-vous de : <a href="#s11">« Tester l'API »</a> &nbsp;·&nbsp; ✓ Fini quand : les 3 cas d'erreur répondent avec le bon code — c'est le critère de réussite du TP.</p>
+<strong>Testez tout avec Postman : les 5 opérations ET les cas d'erreur</strong>
+<p>Insérez d'abord les données de départ (les 3 catégories, via <code>docker compose exec db psql -U postgres -d bibliotheque</code>). Puis, dans Postman :</p>
+<ul>
+<li>Créez une collection <code>Bibliothèque API</code> ;</li>
+<li>Ajoutez les <strong>5 requêtes</strong> : GET liste, GET par id, POST (Body → raw → JSON), PUT, DELETE ;</li>
+<li>Envoyez-les une par une avec <strong>Send</strong> et vérifiez le code de statut : <code>200</code>, <code>200</code>, <code>201</code>, <code>200</code>, <code>204</code> ;</li>
+<li>Terminez par les <strong>3 cas d'erreur</strong> : id inexistant → <code>404</code>, POST rejoué à l'identique → <code>409</code>, body saboté (<code>"titre": ""</code>) → <code>400</code>.</li>
+</ul>
+<p>Gardez un œil sur la console de l'IDE : chaque requête HTTP doit faire défiler son SQL.</p>
+<p class="step-ref">📖 Inspirez-vous de : <a href="#postman">« Tester avec Postman, pas à pas »</a> et <a href="#s11">« Tester l'API »</a> &nbsp;·&nbsp; ✓ Fini quand : les 3 cas d'erreur répondent avec le bon code — c'est le critère de réussite du TP.</p>
 </span></label></li>
 
 </ol>
