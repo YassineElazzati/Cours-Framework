@@ -1713,9 +1713,76 @@ curl -i -X POST http://localhost:8080/api/v1/livres \
 <p>Avec <code>show-sql=true</code>, chaque requête HTTP fait défiler le SQL correspondant. C'est votre meilleur outil d'apprentissage : vous voyez <em>exactement</em> ce que l'ORM écrit à votre place. Vérifiez notamment qu'un <code>GET /livres</code> ne produit qu'<strong>une seule</strong> requête, grâce au <code>join fetch</code>.</p>
 </div>
 
+<h3>Tester avec Postman, pas à pas</h3>
+
+<p>curl est parfait pour comprendre, mais taper du JSON dans un terminal devient vite pénible — surtout sous Windows, où PowerShell interprète les guillemets à sa façon. <strong>Postman</strong> est l'outil standard du métier pour tester une API : une interface graphique où chaque requête est un formulaire qu'on remplit une fois et qu'on rejoue à volonté.</p>
+
+<h4>Étape A — Installer et préparer</h4>
+<ol>
+<li>Téléchargez Postman sur <a href="https://www.postman.com/downloads/">postman.com/downloads</a> et installez-le (compte gratuit, ou mode « lightweight API client » sans compte).</li>
+<li>Cliquez sur <strong>New → Collection</strong> et nommez-la <code>Bibliothèque API</code>. Une collection, c'est un classeur qui regroupe vos requêtes : vous les écrivez une fois, vous les rejouez à chaque modification du code.</li>
+</ol>
+
+<h4>Étape B — Votre première requête : la liste des livres</h4>
+<ol>
+<li>Dans la collection, cliquez sur <strong>Add request</strong>, nommez-la <code>Lister les livres</code>.</li>
+<li>Vérifiez que le menu déroulant à gauche de la barre d'adresse affiche <strong>GET</strong>.</li>
+<li>Dans la barre d'adresse, tapez <code>http://localhost:8080/api/v1/livres</code>.</li>
+<li>Cliquez sur <strong>Send</strong>. En bas : le corps de la réponse (le JSON), et à droite le code <span style="color:var(--green-d);font-weight:700">200 OK</span> avec le temps de réponse.</li>
+</ol>
+
+<h4>Étape C — Envoyer du JSON : le POST</h4>
+<p>C'est la seule manipulation nouvelle, retenez-la bien :</p>
+<ol>
+<li>Nouvelle requête <code>Créer un livre</code>, méthode <strong>POST</strong>, même adresse <code>http://localhost:8080/api/v1/livres</code>.</li>
+<li>Ouvrez l'onglet <strong>Body</strong> (sous la barre d'adresse), cochez <strong>raw</strong>, et dans le menu déroulant à droite choisissez <strong>JSON</strong> — c'est lui qui ajoute l'en-tête <code>Content-Type: application/json</code> à votre place.</li>
+<li>Collez le corps de la requête :</li>
+</ol>
+
+<pre data-lang="Body · raw · JSON">{
+    <span class="s">"titre"</span>: <span class="s">"Le Nom de la rose"</span>,
+    <span class="s">"isbn"</span>: <span class="s">"9782253033134"</span>,
+    <span class="s">"anneePublication"</span>: <span class="n">1980</span>,
+    <span class="s">"idCategorie"</span>: <span class="n">1</span>
+}</pre>
+
+<ol start="4">
+<li>Cliquez sur <strong>Send</strong> : vous devez obtenir <span style="color:var(--green-d);font-weight:700">201 Created</span> et le livre créé en JSON. Ouvrez l'onglet <strong>Headers</strong> de la réponse : l'en-tête <code>Location</code> vous donne l'adresse du nouveau livre.</li>
+</ol>
+
+<h4>Étape D — Compléter la collection</h4>
+<p>Créez les trois requêtes restantes sur le même modèle. Votre collection finale :</p>
+
+<div class="tw">
+<table>
+<thead><tr><th>Requête</th><th>Méthode</th><th>Adresse</th><th>Body</th><th>Attendu</th></tr></thead>
+<tbody>
+<tr><td>Lister les livres</td><td><code>GET</code></td><td><code>/api/v1/livres</code></td><td>—</td><td><code>200</code></td></tr>
+<tr><td>Lire un livre</td><td><code>GET</code></td><td><code>/api/v1/livres/1</code></td><td>—</td><td><code>200</code></td></tr>
+<tr><td>Créer un livre</td><td><code>POST</code></td><td><code>/api/v1/livres</code></td><td>raw · JSON</td><td><code>201</code></td></tr>
+<tr><td>Modifier un livre</td><td><code>PUT</code></td><td><code>/api/v1/livres/1</code></td><td>raw · JSON</td><td><code>200</code></td></tr>
+<tr><td>Supprimer un livre</td><td><code>DELETE</code></td><td><code>/api/v1/livres/1</code></td><td>—</td><td><code>204</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Pour le <strong>PUT</strong>, même manipulation de Body que le POST (raw · JSON), avec le corps de modification vu plus haut. Pour le <strong>DELETE</strong>, aucun body : méthode, adresse, Send.</p>
+
+<h4>Étape E — Rejouer les trois cas d'erreur</h4>
+<ol>
+<li><strong>404</strong> — dupliquez <code>Lire un livre</code> (clic droit → Duplicate) et remplacez le <code>1</code> par <code>9999</code>.</li>
+<li><strong>409</strong> — renvoyez <code>Créer un livre</code> une deuxième fois sans rien changer : l'ISBN est déjà pris.</li>
+<li><strong>400</strong> — dupliquez <code>Créer un livre</code> et sabotez le body : <code>"titre": ""</code> et <code>"isbn": "123"</code>. La réponse doit lister les champs fautifs.</li>
+</ol>
+
 <div class="box tip">
-<span class="lbl">💡 Alternatives à curl</span>
-<p>Sous Windows, PowerShell interprète différemment les guillemets. Plus confortable : <strong>Postman</strong>, ou un fichier <code>requetes.http</code> directement dans IntelliJ — vous cliquez sur une flèche verte à côté de chaque requête, et vous versionnez vos tests avec le code.</p>
+<span class="lbl">💡 Le réflexe à prendre : lire le code AVANT le corps</span>
+<p>À chaque <strong>Send</strong>, regardez d'abord le code de statut en haut à droite de la réponse : c'est lui qui dit si tout va bien (<code>2xx</code>), si le client s'est trompé (<code>4xx</code>) ou si votre serveur a un bug (<code>5xx</code>). Un <code>200</code> avec un corps vide et un <code>500</code> avec un long message ne racontent pas du tout la même histoire.</p>
+</div>
+
+<div class="box tip">
+<span class="lbl">💡 L'alternative dans l'IDE : le fichier .http</span>
+<p>IntelliJ IDEA propose la même chose sans quitter l'éditeur : créez un fichier <code>requetes.http</code> à la racine du projet, écrivez-y vos requêtes, et cliquez sur la flèche verte à côté de chacune. Avantage : le fichier est versionné avec le code — vos tests suivent le projet.</p>
 </div>
 </section>
 
