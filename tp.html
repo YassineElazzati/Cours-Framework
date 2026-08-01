@@ -248,10 +248,10 @@ footer.end{margin-top:88px;padding-top:24px;border-top:4px solid var(--green);fo
     <ul>
       <li><strong>Séance passerelle</strong> — framework, couches, API REST, verbes HTTP, ORM, injection de dépendances</li>
       <li><strong>Modélisation</strong> — savoir lire un MCD et le traduire en tables</li>
-      <li><strong>PostgreSQL</strong> — une base accessible en local, et savoir créer une base</li>
+      <li><strong>PostgreSQL</strong> — savoir écrire un <code>INSERT</code> et un <code>SELECT</code> ; la base tournera dans Docker</li>
       <li><strong>Java</strong> — classes, interfaces, constructeurs, généricité (<code>List&lt;T&gt;</code>)</li>
     </ul>
-    <p class="note">Outils : JDK 21 ou 25, un IDE (IntelliJ IDEA ou VS Code), PostgreSQL 16 ou plus, et un navigateur.</p>
+    <p class="note">Outils : JDK 21 ou 25, un IDE (IntelliJ IDEA ou VS Code), <strong>Docker Desktop</strong> (recommandé — sinon PostgreSQL 16+ installé en local), et un navigateur.</p>
   </div>
 </header>
 
@@ -352,9 +352,9 @@ footer.end{margin-top:88px;padding-top:24px;border-top:4px solid var(--green);fo
 
 <li><label><input type="checkbox">
 <span class="step-body"><span class="step-tag"></span>
-<strong>Créez la base de données PostgreSQL</strong>
-<p>Ouvrez pgAdmin ou <code>psql</code> et créez une base vide nommée <code>bibliotheque</code>. Ne créez <strong>aucune table</strong> : c'est Hibernate qui les fabriquera à partir de vos entités. Relisez le MCD pour avoir le domaine en tête.</p>
-<p class="step-ref">📖 Inspirez-vous de : <a href="#s2">« Le domaine : la bibliothèque »</a> &nbsp;·&nbsp; ✓ Fini quand : la base <code>bibliotheque</code> existe et est vide.</p>
+<strong>Préparez la base de données PostgreSQL</strong>
+<p><strong>Voie recommandée — Docker :</strong> vous créerez un fichier <code>docker-compose.yml</code> à la racine du projet (donc juste après l'étape 2) et lancerez <code>docker compose up -d</code> : la base <code>bibliotheque</code> est créée automatiquement. Vérifiez simplement dès maintenant que Docker Desktop est installé et démarre. <strong>Sans Docker :</strong> créez à la main une base vide <code>bibliotheque</code> dans pgAdmin ou <code>psql</code>. Dans les deux cas, ne créez <strong>aucune table</strong> : c'est Hibernate qui les fabriquera à partir de vos entités.</p>
+<p class="step-ref">📖 Inspirez-vous de : <a href="#docker">« La base de données avec Docker Compose »</a> et <a href="#s2">« Le domaine : la bibliothèque »</a> &nbsp;·&nbsp; ✓ Fini quand : <code>docker compose ps</code> affiche la base <code>running</code> (ou la base locale existe et est vide).</p>
 </span></label></li>
 
 <li><label><input type="checkbox">
@@ -822,6 +822,62 @@ src/main/java/fr/bibliotheque/api/
   <li>Après cette ligne, <strong>vous n'appelez plus jamais rien</strong>. C'est l'inversion de contrôle : à partir d'ici, c'est le framework qui appelle votre code.</li>
 </ol>
 
+<h3 id="docker">La base de données avec Docker Compose (recommandé)</h3>
+
+<p>Plutôt que d'installer PostgreSQL sur votre machine, lancez-le dans un <strong>conteneur Docker</strong> : tout le monde obtient exactement la même base, avec la même version, en une seule commande — et on peut la jeter et la recréer à volonté.</p>
+
+<div class="meta">
+<span class="lbl">Le meuble en kit déjà monté</span>
+<p>Installer PostgreSQL à la main, c'est monter le meuble : télécharger, configurer le mot de passe, créer la base, et déboguer les différences entre le poste de votre voisin et le vôtre.</p>
+<p>Docker vous <strong>livre le meuble déjà monté</strong> : une image contient PostgreSQL installé, configuré, prêt à démarrer. Le fichier <code>docker-compose.yml</code> est le bon de commande : il décrit ce que vous voulez (quelle version, quel mot de passe, quelle base), et <code>docker compose up</code> vous le livre. Même bon de commande = même livraison, sur toutes les machines de la classe.</p>
+</div>
+
+<p>Créez un fichier <code>docker-compose.yml</code> <strong>à la racine du projet</strong> (à côté du <code>pom.xml</code>) :</p>
+
+<pre data-lang="docker-compose.yml"><span class="t">services</span>:
+  <span class="t">db</span>:
+    <span class="t">image</span>: <span class="s">postgres:17</span>              <span class="c"># la version, figée pour toute la classe</span>
+    <span class="t">container_name</span>: <span class="s">bibliotheque-db</span>
+    <span class="t">environment</span>:
+      <span class="t">POSTGRES_DB</span>: <span class="s">bibliotheque</span>     <span class="c"># la base est créée automatiquement</span>
+      <span class="t">POSTGRES_USER</span>: <span class="s">postgres</span>
+      <span class="t">POSTGRES_PASSWORD</span>: <span class="s">bibliotheque</span>
+    <span class="t">ports</span>:
+      - <span class="s">"5432:5432"</span>                  <span class="c"># port du conteneur → port de votre machine</span>
+    <span class="t">volumes</span>:
+      - <span class="t">pgdata</span>:/var/lib/postgresql/data  <span class="c"># les données survivent aux redémarrages</span>
+
+<span class="t">volumes</span>:
+  <span class="t">pgdata</span>:</pre>
+
+<p>Puis, dans un terminal ouvert à la racine du projet :</p>
+
+<pre data-lang="Terminal"><span class="c"># Démarrer la base (˗d = en arrière-plan)</span>
+docker compose up -d
+
+<span class="c"># Vérifier qu'elle tourne</span>
+docker compose ps
+<span class="c"># → bibliotheque-db   running   0.0.0.0:5432-&gt;5432/tcp</span>
+
+<span class="c"># Ouvrir un terminal SQL dans le conteneur (pour vos INSERT de la §11)</span>
+docker compose exec db psql -U postgres -d bibliotheque
+
+<span class="c"># Arrêter la base (les données sont conservées)</span>
+docker compose down
+
+<span class="c"># Tout effacer et repartir de zéro (données comprises)</span>
+docker compose down -v</pre>
+
+<div class="box key">
+<span class="lbl">🎯 Deux choses que Docker fait pour vous</span>
+<p>Grâce à <code>POSTGRES_DB: bibliotheque</code>, la base est <strong>créée automatiquement</strong> au premier démarrage : le <code>CREATE DATABASE</code> de la §2 devient inutile. Et grâce au volume <code>pgdata</code>, vos données <strong>survivent</strong> à un <code>docker compose down</code> — seul <code>down -v</code> les efface, ce qui est d'ailleurs très pratique pour recommencer un test proprement.</p>
+</div>
+
+<div class="box tip">
+<span class="lbl">💡 Vous avez déjà PostgreSQL installé ?</span>
+<p>Docker n'est pas obligatoire : créez simplement la base à la main (<code>CREATE DATABASE bibliotheque;</code>) et utilisez vos propres identifiants dans <code>application.properties</code>. Attention au conflit de port : si un PostgreSQL local tourne déjà sur <code>5432</code>, le conteneur ne pourra pas démarrer — changez alors la ligne ports en <code>"5433:5432"</code> et adaptez l'URL JDBC.</p>
+</div>
+
 <h3>La configuration : application.properties</h3>
 
 <p>Ouvrez <code>src/main/resources/application.properties</code>. Il est vide. Remplissez-le :</p>
@@ -829,7 +885,7 @@ src/main/java/fr/bibliotheque/api/
 <pre data-lang="application.properties"><span class="c"># ── Connexion à PostgreSQL ────────────────────────────────</span>
 spring.datasource.url=jdbc:postgresql://localhost:5432/bibliotheque
 spring.datasource.username=postgres
-spring.datasource.password=votre_mot_de_passe
+spring.datasource.password=bibliotheque  <span class="c"># celui du docker-compose.yml</span>
 
 <span class="c"># ── Comportement de l'ORM ─────────────────────────────────</span>
 spring.jpa.hibernate.ddl-auto=update
@@ -1643,7 +1699,7 @@ server.port=8080</pre>
 
 <h3>D'abord, quelques données</h3>
 
-<p>Votre table <code>categorie</code> est vide, et un livre exige une catégorie. Insérez-en trois directement en SQL :</p>
+<p>Votre table <code>categorie</code> est vide, et un livre exige une catégorie. Insérez-en trois directement en SQL — avec Docker, ouvrez le terminal SQL du conteneur : <code>docker compose exec db psql -U postgres -d bibliotheque</code> ; sinon utilisez psql ou pgAdmin :</p>
 
 <pre data-lang="SQL"><span class="k">INSERT INTO</span> categorie (libelle) <span class="k">VALUES</span>
     (<span class="s">'Roman'</span>), (<span class="s">'Policier'</span>), (<span class="s">'Science-fiction'</span>);
