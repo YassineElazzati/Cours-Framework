@@ -219,6 +219,7 @@ footer.end{margin-top:88px;padding-top:24px;border-top:4px solid var(--green);fo
   <li><a href="#s12">Récapitulatif</a></li>
   <li><a href="#s13">À vous de jouer</a></li>
   <li><a href="#s14">Les pièges du premier CRUD</a></li>
+  <li><a href="#feuille">Votre feuille de route</a></li>
 </ol>
 </nav>
 </details>
@@ -344,101 +345,9 @@ footer.end{margin-top:88px;padding-top:24px;border-top:4px solid var(--green);fo
 <p>C'est normal et c'est déstabilisant la première fois. Pendant quatre étapes, vous écrivez du code sans rien voir. Tenez bon : à l'étape 5, tout s'allume d'un coup. Les fois suivantes, vous irez trois fois plus vite.</p>
 </div>
 
-<h3>Votre feuille de route — à cocher au fur et à mesure</h3>
-
-<p>Voici votre TP résumé en 12 étapes, <strong>dans l'ordre exact où les faire</strong>. Pour chaque étape : ce que vous devez faire, la section du document où tout est expliqué, et le signe qui prouve que c'est terminé. Ne sautez aucune étape, ne changez pas l'ordre.</p>
-
-<ol class="todo">
-
-<li><label><input type="checkbox">
-<span class="step-body"><span class="step-tag"></span>
-<strong>Préparez la base de données PostgreSQL</strong>
-<p><strong>Voie recommandée — Docker :</strong> vous créerez un fichier <code>docker-compose.yml</code> à la racine du projet (donc juste après l'étape 2) et lancerez <code>docker compose up -d</code> : la base <code>bibliotheque</code> est créée automatiquement. Vérifiez simplement dès maintenant que Docker Desktop est installé et démarre. <strong>Sans Docker :</strong> créez à la main une base vide <code>bibliotheque</code> dans pgAdmin ou <code>psql</code>. Dans les deux cas, ne créez <strong>aucune table</strong> : c'est Hibernate qui les fabriquera à partir de vos entités.</p>
-<p class="step-ref">📖 Inspirez-vous de : <a href="#docker">« La base de données avec Docker Compose »</a> et <a href="#s2">« Le domaine : la bibliothèque »</a> &nbsp;·&nbsp; ✓ Fini quand : <code>docker compose ps</code> affiche la base <code>running</code> (ou la base locale existe et est vide).</p>
-</span></label></li>
-
-<li><label><input type="checkbox">
-<span class="step-body"><span class="step-tag"></span>
-<strong>Générez le projet sur Spring Initializr</strong>
-<p>Remplissez le formulaire (groupe <code>fr.bibliotheque</code>, artefact <code>api</code>, Java 21) et cochez les <strong>5 dépendances</strong> : Spring Web, Spring Data JPA, PostgreSQL Driver, Validation, DevTools. Téléchargez le zip, décompressez, ouvrez dans l'IDE.</p>
-<p class="step-ref">📖 Inspirez-vous de : <a href="#s3">« Spring Initializr »</a> &nbsp;·&nbsp; ✓ Fini quand : le projet est ouvert dans l'IDE et les bibliothèques ont fini de se télécharger.</p>
-</span></label></li>
-
-<li><label><input type="checkbox">
-<span class="step-body"><span class="step-tag"></span>
-<strong>Repérez-vous dans le squelette, puis créez les 6 paquets</strong>
-<p>Lisez le <code>pom.xml</code>, trouvez <code>ApiApplication.java</code>, puis créez les paquets vides qui structureront tout le TP : <code>entite</code>, <code>repository</code>, <code>service</code>, <code>dto</code>, <code>controleur</code>, <code>erreur</code>. Gardez l'arborescence cible sous les yeux.</p>
-<p class="step-ref">📖 Inspirez-vous de : <a href="#s4">« Le projet généré et le pom.xml »</a> (surtout « L'arborescence cible ») &nbsp;·&nbsp; ✓ Fini quand : les 6 paquets existent à côté de <code>ApiApplication.java</code>.</p>
-</span></label></li>
-
-<li><label><input type="checkbox">
-<span class="step-body"><span class="step-tag"></span>
-<strong>Configurez la connexion à la base</strong>
-<p>Remplissez <code>application.properties</code> : l'URL JDBC vers votre base <code>bibliotheque</code>, votre utilisateur et mot de passe PostgreSQL, <code>ddl-auto=update</code> et <code>show-sql=true</code>. Lancez l'application une première fois.</p>
-<p class="step-ref">📖 Inspirez-vous de : <a href="#s4">« La configuration : application.properties »</a> (fin de la section 4) &nbsp;·&nbsp; ✓ Fini quand : l'application démarre sans erreur et affiche « Tomcat started on port 8080 ».</p>
-</span></label></li>
-
-<li><label><input type="checkbox">
-<span class="step-body"><span class="step-tag"></span>
-<strong>Écrivez les 3 entités, dans cet ordre : Categorie, Auteur, Livre</strong>
-<p>Dans le paquet <code>entite</code>. Commencez par <code>Categorie</code> (la plus simple), puis <code>Auteur</code>, et terminez par <code>Livre</code> qui porte les deux relations (<code>@ManyToOne</code> vers la catégorie, <code>@ManyToMany</code> vers les auteurs). Après chaque entité, relancez et regardez Hibernate créer la table dans la console.</p>
-<p class="step-ref">📖 Inspirez-vous de : <a href="#s5">« Les entités »</a> &nbsp;·&nbsp; ✓ Fini quand : les tables <code>categorie</code>, <code>auteur</code>, <code>livre</code> et <code>livre_auteur</code> existent dans PostgreSQL.</p>
-</span></label></li>
-
-<li><label><input type="checkbox">
-<span class="step-body"><span class="step-tag"></span>
-<strong>Écrivez les 3 repositories</strong>
-<p>Dans le paquet <code>repository</code> : trois interfaces qui étendent <code>JpaRepository</code>. <code>CategorieRepository</code> et <code>AuteurRepository</code> tiennent en une ligne ; <code>LivreRepository</code> reçoit en plus les requêtes sur mesure (dont le <code>join fetch</code>).</p>
-<p class="step-ref">📖 Inspirez-vous de : <a href="#s6">« Le repository »</a> &nbsp;·&nbsp; ✓ Fini quand : les 3 interfaces compilent et l'application démarre toujours.</p>
-</span></label></li>
-
-<li><label><input type="checkbox">
-<span class="step-body"><span class="step-tag"></span>
-<strong>Créez les exceptions métier</strong>
-<p>Dans le paquet <code>erreur</code> : <code>LivreIntrouvableException</code>, <code>CategorieIntrouvableException</code>, <code>IsbnDejaUtiliseException</code>. Trois petites classes — le service en a besoin à l'étape suivante, c'est pour ça qu'on les écrit d'abord.</p>
-<p class="step-ref">📖 Inspirez-vous de : <a href="#s7">« Le service » → « D'abord, les exceptions métier »</a> &nbsp;·&nbsp; ✓ Fini quand : les 3 classes existent dans <code>erreur</code>.</p>
-</span></label></li>
-
-<li><label><input type="checkbox">
-<span class="step-body"><span class="step-tag"></span>
-<strong>Écrivez le service — le cerveau de l'application</strong>
-<p>Dans le paquet <code>service</code> : <code>LivreService</code>, annoté <code>@Service</code>. C'est ici que vivent toutes les règles : ISBN unique, catégorie existante, livre introuvable. Les repositories arrivent par le constructeur — c'est l'injection de dépendances en action.</p>
-<p class="step-ref">📖 Inspirez-vous de : <a href="#s7">« Le service »</a> &nbsp;·&nbsp; ✓ Fini quand : les 5 méthodes (lister, lire, créer, modifier, supprimer) compilent.</p>
-</span></label></li>
-
-<li><label><input type="checkbox">
-<span class="step-body"><span class="step-tag"></span>
-<strong>Écrivez les 3 DTO</strong>
-<p>Dans le paquet <code>dto</code> : <code>CreerLivreRequete</code> et <code>ModifierLivreRequete</code> (ce qui entre, avec les annotations de validation <code>@NotBlank</code>, <code>@Pattern</code>…), et <code>LivreReponse</code> (ce qui sort). Vos entités ne franchiront jamais la porte.</p>
-<p class="step-ref">📖 Inspirez-vous de : <a href="#s8">« Les DTO »</a> &nbsp;·&nbsp; ✓ Fini quand : les 3 records existent et le service les utilise.</p>
-</span></label></li>
-
-<li><label><input type="checkbox">
-<span class="step-body"><span class="step-tag"></span>
-<strong>Écrivez le contrôleur — la porte d'entrée</strong>
-<p>Dans le paquet <code>controleur</code> : <code>LivreController</code>, annoté <code>@RestController</code>, avec les 5 adresses (GET liste, GET par id, POST, PUT, DELETE). Il traduit et délègue au service — aucune règle métier ici.</p>
-<p class="step-ref">📖 Inspirez-vous de : <a href="#s9">« Le contrôleur REST »</a> &nbsp;·&nbsp; ✓ Fini quand : l'application démarre et <code>GET http://localhost:8080/api/v1/livres</code> répond <code>[]</code>.</p>
-</span></label></li>
-
-<li><label><input type="checkbox">
-<span class="step-body"><span class="step-tag"></span>
-<strong>Branchez le gestionnaire d'erreurs</strong>
-<p>Dans le paquet <code>erreur</code> : <code>GestionnaireErreurs</code>, annoté <code>@RestControllerAdvice</code>. Il attrape vos 3 exceptions et les traduit en réponses propres : introuvable → <code>404</code>, ISBN en double → <code>409</code>, données invalides → <code>400</code>.</p>
-<p class="step-ref">📖 Inspirez-vous de : <a href="#s10">« La gestion des erreurs »</a> &nbsp;·&nbsp; ✓ Fini quand : un <code>GET /livres/9999</code> répond <code>404</code> avec un message JSON, pas une page d'erreur de 200 lignes.</p>
-</span></label></li>
-
-<li><label><input type="checkbox">
-<span class="step-body"><span class="step-tag"></span>
-<strong>Testez tout : les 5 opérations ET les cas d'erreur</strong>
-<p>Insérez les données de départ (catégories, auteurs), puis déroulez les 5 opérations CRUD avec curl ou Postman. Terminez par les 3 cas d'erreur : 404, 409, 400. Gardez un œil sur la console : chaque requête HTTP doit faire défiler son SQL.</p>
-<p class="step-ref">📖 Inspirez-vous de : <a href="#s11">« Tester l'API »</a> &nbsp;·&nbsp; ✓ Fini quand : les 3 cas d'erreur répondent avec le bon code — c'est le critère de réussite du TP.</p>
-</span></label></li>
-
-</ol>
-
-<div class="box key">
-<span class="lbl">🎯 Et ensuite ?</span>
-<p>Quand les 12 cases sont cochées, votre premier CRUD est terminé. Passez alors à <a href="#s13">« À vous de jouer »</a> : vous referez exactement le même chemin (entité → repository → service → DTO → contrôleur) pour <code>ADHERENT</code> et <code>EMPRUNTER</code>, mais cette fois sans guide. Et avant de rendre, relisez <a href="#s14">« Les pièges du premier CRUD »</a>.</p>
+<div class="box recall">
+<span class="lbl">📝 La feuille de route vous attend à la fin</span>
+<p>Tout ce TP est résumé en <a href="#feuille">12 étapes à cocher, à la fin du document</a>. Gardez-la ouverte dans un coin pendant que vous codez : chaque étape dit quoi faire, où trouver l'explication, et à quoi reconnaître qu'elle est terminée.</p>
 </div>
 </section>
 
@@ -2006,6 +1915,119 @@ fr/bibliotheque/api/
 <div class="box recall">
 <span class="lbl">📝 Ce que vous avez ajouté à votre bagage</span>
 <p>Spring Initializr, le <code>pom.xml</code> et Maven, les entités JPA et leurs relations, les repositories Spring Data, la couche service et les transactions, les DTO et la validation, le contrôleur REST et les codes de statut, et la gestion centralisée des erreurs. C'est le socle de la quasi-totalité des applications Java d'entreprise.</p>
+</div>
+</section>
+
+<section id="feuille">
+<h2>Votre feuille de route</h2>
+<p class="section-sub">Tout le TP en 12 étapes à cocher, dans l'ordre exact où les faire.</p>
+
+<p>Pour chaque étape : ce que vous devez faire, la section du document où tout est expliqué, et le signe qui prouve que c'est terminé. Ne sautez aucune étape, ne changez pas l'ordre — imprimez cette liste ou gardez-la ouverte pendant que vous codez.</p>
+
+<ol class="todo">
+
+<li><label><input type="checkbox">
+<span class="step-body"><span class="step-tag"></span>
+<strong>Générez le projet sur Spring Initializr</strong>
+<p>Ouvrez <a href="https://start.spring.io">start.spring.io</a> et remplissez chaque champ <strong>exactement</strong> comme ceci :</p>
+<ul>
+<li><strong>Project</strong> : <code>Maven</code></li>
+<li><strong>Language</strong> : <code>Java</code></li>
+<li><strong>Spring Boot</strong> : la dernière version <code>4.1.x</code> <strong>sans</strong> mention <em>SNAPSHOT</em> ni <em>M</em></li>
+<li><strong>Group</strong> : <code>fr.bibliotheque</code></li>
+<li><strong>Artifact</strong> : <code>api</code></li>
+<li><strong>Name</strong> : <code>api</code> (se remplit tout seul)</li>
+<li><strong>Description</strong> : libre, par exemple <code>API REST de la bibliothèque</code></li>
+<li><strong>Package name</strong> : <code>fr.bibliotheque.api</code> (se remplit tout seul — ne le changez pas : tout votre code ira dedans)</li>
+<li><strong>Packaging</strong> : <code>Jar</code></li>
+<li><strong>Java</strong> : <code>21</code></li>
+</ul>
+<p>Puis cliquez sur <strong>ADD DEPENDENCIES</strong> et cochez les <strong>5 dépendances</strong> : <code>Spring Web</code>, <code>Spring Data JPA</code>, <code>PostgreSQL Driver</code>, <code>Validation</code>, <code>Spring Boot DevTools</code>. Cliquez sur <strong>GENERATE</strong>, décompressez le zip téléchargé, et ouvrez le dossier dans votre IDE.</p>
+<p class="step-ref">📖 Inspirez-vous de : <a href="#s3">« Spring Initializr »</a> (le pourquoi de chaque champ y est expliqué) &nbsp;·&nbsp; ✓ Fini quand : le projet est ouvert dans l'IDE et les bibliothèques ont fini de se télécharger.</p>
+</span></label></li>
+
+<li><label><input type="checkbox">
+<span class="step-body"><span class="step-tag"></span>
+<strong>Lancez la base de données PostgreSQL</strong>
+<p><strong>Voie recommandée — Docker :</strong> créez le fichier <code>docker-compose.yml</code> à la racine du projet (à côté du <code>pom.xml</code>), copiez son contenu depuis la section indiquée ci-dessous, puis lancez <code>docker compose up -d</code> : la base <code>bibliotheque</code> est créée automatiquement. <strong>Sans Docker :</strong> créez à la main une base vide <code>bibliotheque</code> dans pgAdmin ou <code>psql</code>. Dans les deux cas, ne créez <strong>aucune table</strong> : c'est Hibernate qui les fabriquera à partir de vos entités.</p>
+<p class="step-ref">📖 Inspirez-vous de : <a href="#docker">« La base de données avec Docker Compose »</a> &nbsp;·&nbsp; ✓ Fini quand : <code>docker compose ps</code> affiche la base <code>running</code> (ou la base locale existe et est vide).</p>
+</span></label></li>
+
+<li><label><input type="checkbox">
+<span class="step-body"><span class="step-tag"></span>
+<strong>Repérez-vous dans le squelette, puis créez les 6 paquets</strong>
+<p>Lisez le <code>pom.xml</code>, trouvez <code>ApiApplication.java</code>, puis créez les paquets vides qui structureront tout le TP : <code>entite</code>, <code>repository</code>, <code>service</code>, <code>dto</code>, <code>controleur</code>, <code>erreur</code>. Gardez l'arborescence cible sous les yeux.</p>
+<p class="step-ref">📖 Inspirez-vous de : <a href="#s4">« Le projet généré et le pom.xml »</a> (surtout « L'arborescence cible ») &nbsp;·&nbsp; ✓ Fini quand : les 6 paquets existent à côté de <code>ApiApplication.java</code>.</p>
+</span></label></li>
+
+<li><label><input type="checkbox">
+<span class="step-body"><span class="step-tag"></span>
+<strong>Configurez la connexion à la base</strong>
+<p>Remplissez <code>application.properties</code> : l'URL JDBC vers votre base <code>bibliotheque</code>, votre utilisateur et mot de passe PostgreSQL, <code>ddl-auto=update</code> et <code>show-sql=true</code>. Lancez l'application une première fois.</p>
+<p class="step-ref">📖 Inspirez-vous de : <a href="#s4">« La configuration : application.properties »</a> (fin de la section 4) &nbsp;·&nbsp; ✓ Fini quand : l'application démarre sans erreur et affiche « Tomcat started on port 8080 ».</p>
+</span></label></li>
+
+<li><label><input type="checkbox">
+<span class="step-body"><span class="step-tag"></span>
+<strong>Écrivez les 3 entités, dans cet ordre : Categorie, Auteur, Livre</strong>
+<p>Dans le paquet <code>entite</code>. Commencez par <code>Categorie</code> (la plus simple), puis <code>Auteur</code>, et terminez par <code>Livre</code> qui porte les deux relations (<code>@ManyToOne</code> vers la catégorie, <code>@ManyToMany</code> vers les auteurs). Après chaque entité, relancez et regardez Hibernate créer la table dans la console.</p>
+<p class="step-ref">📖 Inspirez-vous de : <a href="#s5">« Les entités »</a> &nbsp;·&nbsp; ✓ Fini quand : les tables <code>categorie</code>, <code>auteur</code>, <code>livre</code> et <code>livre_auteur</code> existent dans PostgreSQL.</p>
+</span></label></li>
+
+<li><label><input type="checkbox">
+<span class="step-body"><span class="step-tag"></span>
+<strong>Écrivez les 3 repositories</strong>
+<p>Dans le paquet <code>repository</code> : trois interfaces qui étendent <code>JpaRepository</code>. <code>CategorieRepository</code> et <code>AuteurRepository</code> tiennent en une ligne ; <code>LivreRepository</code> reçoit en plus les requêtes sur mesure (dont le <code>join fetch</code>).</p>
+<p class="step-ref">📖 Inspirez-vous de : <a href="#s6">« Le repository »</a> &nbsp;·&nbsp; ✓ Fini quand : les 3 interfaces compilent et l'application démarre toujours.</p>
+</span></label></li>
+
+<li><label><input type="checkbox">
+<span class="step-body"><span class="step-tag"></span>
+<strong>Créez les exceptions métier</strong>
+<p>Dans le paquet <code>erreur</code> : <code>LivreIntrouvableException</code>, <code>CategorieIntrouvableException</code>, <code>IsbnDejaUtiliseException</code>. Trois petites classes — le service en a besoin à l'étape suivante, c'est pour ça qu'on les écrit d'abord.</p>
+<p class="step-ref">📖 Inspirez-vous de : <a href="#s7">« Le service » → « D'abord, les exceptions métier »</a> &nbsp;·&nbsp; ✓ Fini quand : les 3 classes existent dans <code>erreur</code>.</p>
+</span></label></li>
+
+<li><label><input type="checkbox">
+<span class="step-body"><span class="step-tag"></span>
+<strong>Écrivez le service — le cerveau de l'application</strong>
+<p>Dans le paquet <code>service</code> : <code>LivreService</code>, annoté <code>@Service</code>. C'est ici que vivent toutes les règles : ISBN unique, catégorie existante, livre introuvable. Les repositories arrivent par le constructeur — c'est l'injection de dépendances en action.</p>
+<p class="step-ref">📖 Inspirez-vous de : <a href="#s7">« Le service »</a> &nbsp;·&nbsp; ✓ Fini quand : les 5 méthodes (lister, lire, créer, modifier, supprimer) compilent.</p>
+</span></label></li>
+
+<li><label><input type="checkbox">
+<span class="step-body"><span class="step-tag"></span>
+<strong>Écrivez les 3 DTO</strong>
+<p>Dans le paquet <code>dto</code> : <code>CreerLivreRequete</code> et <code>ModifierLivreRequete</code> (ce qui entre, avec les annotations de validation <code>@NotBlank</code>, <code>@Pattern</code>…), et <code>LivreReponse</code> (ce qui sort). Vos entités ne franchiront jamais la porte.</p>
+<p class="step-ref">📖 Inspirez-vous de : <a href="#s8">« Les DTO »</a> &nbsp;·&nbsp; ✓ Fini quand : les 3 records existent et le service les utilise.</p>
+</span></label></li>
+
+<li><label><input type="checkbox">
+<span class="step-body"><span class="step-tag"></span>
+<strong>Écrivez le contrôleur — la porte d'entrée</strong>
+<p>Dans le paquet <code>controleur</code> : <code>LivreController</code>, annoté <code>@RestController</code>, avec les 5 adresses (GET liste, GET par id, POST, PUT, DELETE). Il traduit et délègue au service — aucune règle métier ici.</p>
+<p class="step-ref">📖 Inspirez-vous de : <a href="#s9">« Le contrôleur REST »</a> &nbsp;·&nbsp; ✓ Fini quand : l'application démarre et <code>GET http://localhost:8080/api/v1/livres</code> répond <code>[]</code>.</p>
+</span></label></li>
+
+<li><label><input type="checkbox">
+<span class="step-body"><span class="step-tag"></span>
+<strong>Branchez le gestionnaire d'erreurs</strong>
+<p>Dans le paquet <code>erreur</code> : <code>GestionnaireErreurs</code>, annoté <code>@RestControllerAdvice</code>. Il attrape vos 3 exceptions et les traduit en réponses propres : introuvable → <code>404</code>, ISBN en double → <code>409</code>, données invalides → <code>400</code>.</p>
+<p class="step-ref">📖 Inspirez-vous de : <a href="#s10">« La gestion des erreurs »</a> &nbsp;·&nbsp; ✓ Fini quand : un <code>GET /livres/9999</code> répond <code>404</code> avec un message JSON, pas une page d'erreur de 200 lignes.</p>
+</span></label></li>
+
+<li><label><input type="checkbox">
+<span class="step-body"><span class="step-tag"></span>
+<strong>Testez tout : les 5 opérations ET les cas d'erreur</strong>
+<p>Insérez les données de départ (catégories, auteurs), puis déroulez les 5 opérations CRUD avec curl ou Postman. Terminez par les 3 cas d'erreur : 404, 409, 400. Gardez un œil sur la console : chaque requête HTTP doit faire défiler son SQL.</p>
+<p class="step-ref">📖 Inspirez-vous de : <a href="#s11">« Tester l'API »</a> &nbsp;·&nbsp; ✓ Fini quand : les 3 cas d'erreur répondent avec le bon code — c'est le critère de réussite du TP.</p>
+</span></label></li>
+
+</ol>
+
+<div class="box key">
+<span class="lbl">🎯 Et ensuite ?</span>
+<p>Quand les 12 cases sont cochées, votre premier CRUD est terminé. Passez alors à <a href="#s13">« À vous de jouer »</a> : vous referez exactement le même chemin (entité → repository → service → DTO → contrôleur) pour <code>ADHERENT</code> et <code>EMPRUNTER</code>, mais cette fois sans guide. Et avant de rendre, relisez <a href="#s14">« Les pièges du premier CRUD »</a>.</p>
 </div>
 </section>
 
