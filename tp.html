@@ -108,7 +108,9 @@ a{color:var(--green-d)}
 
 /* ---------------- Feuille de route (todo) ---------------- */
 .todo{list-style:none;margin:26px 0;padding:0;counter-reset:step}
-.todo li{counter-increment:step;position:relative;border:1px solid var(--line);border-left:4px solid var(--green);border-radius:0 5px 5px 0;background:#fff;margin:0 0 12px;padding:16px 20px 14px 20px;page-break-inside:avoid}
+.todo>li{counter-increment:step;position:relative;border:1px solid var(--line);border-left:4px solid var(--green);border-radius:0 5px 5px 0;background:#fff;margin:0 0 12px;padding:16px 20px 14px 20px;page-break-inside:avoid}
+.todo .step-body ul{margin:0 0 10px;padding-left:22px}
+.todo .step-body ul li{font-size:15px;margin:4px 0}
 .todo label{display:flex;gap:14px;align-items:flex-start;cursor:pointer;margin:0}
 .todo input[type=checkbox]{appearance:none;-webkit-appearance:none;flex:0 0 auto;width:22px;height:22px;margin-top:2px;border:2px solid var(--green);border-radius:4px;background:#fff;cursor:pointer;position:relative}
 .todo input[type=checkbox]:checked{background:var(--green)}
