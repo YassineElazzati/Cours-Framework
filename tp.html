@@ -542,6 +542,64 @@ api/
 
 <p>Quatre fichiers seulement. Tout le reste, c'est vous qui allez l'écrire.</p>
 
+<h3>L'arborescence cible : ce que le projet doit devenir</h3>
+
+<p>Avant d'écrire la moindre ligne, regardez la destination. Voici à quoi ressemblera votre projet <strong>à la fin du TP</strong>. Chaque dossier est une <strong>couche</strong> : un rôle précis, et un seul. Gardez cette carte sous les yeux pendant tout le TP — à chaque fichier que vous créez, demandez-vous dans quel dossier il va, et pourquoi.</p>
+
+<pre data-lang="Arborescence"><span class="c"># Le projet terminé — chaque dossier = une couche, un rôle</span>
+src/main/java/fr/bibliotheque/api/
+├── ApiApplication.java              <span class="c"># fourni — le bouton ON de l'application</span>
+│
+├── controleur/                      <span class="c">── LA PORTE D'ENTRÉE ──</span>
+│   └── LivreController.java         <span class="c"># reçoit les requêtes HTTP, renvoie le JSON</span>
+│
+├── dto/                             <span class="c">── LES FORMULAIRES ──</span>
+│   ├── CreerLivreRequete.java       <span class="c"># ce que le client a le droit d'envoyer</span>
+│   ├── ModifierLivreRequete.java    <span class="c"># idem, pour la modification</span>
+│   └── LivreReponse.java            <span class="c"># ce que vous acceptez de montrer</span>
+│
+├── service/                         <span class="c">── LE CERVEAU ──</span>
+│   └── LivreService.java            <span class="c"># les règles métier : c'est LUI qui décide</span>
+│
+├── repository/                      <span class="c">── LE MAGASINIER ──</span>
+│   ├── CategorieRepository.java     <span class="c"># parle à la table categorie</span>
+│   ├── AuteurRepository.java        <span class="c"># parle à la table auteur</span>
+│   └── LivreRepository.java         <span class="c"># parle à la table livre</span>
+│
+├── entite/                          <span class="c">── LE MIROIR DE LA BASE ──</span>
+│   ├── Categorie.java               <span class="c"># la table categorie, en Java</span>
+│   ├── Auteur.java                  <span class="c"># la table auteur, en Java</span>
+│   └── Livre.java                   <span class="c"># la table livre + ses relations</span>
+│
+└── erreur/                          <span class="c">── LE SERVICE RÉCLAMATIONS ──</span>
+    ├── LivreIntrouvableException.java
+    ├── CategorieIntrouvableException.java
+    ├── IsbnDejaUtiliseException.java
+    └── GestionnaireErreurs.java     <span class="c"># traduit chaque problème en 404/409/400</span></pre>
+
+<h4>Le contrôleur — la porte d'entrée</h4>
+<p>C'est <strong>lui qui reçoit la donnée</strong>. Quand une requête HTTP arrive (<code>POST /api/v1/livres</code> avec du JSON), c'est le contrôleur qui décroche. Son travail : traduire le JSON en objet Java, vérifier que le format est correct, puis <strong>passer la main au service</strong>. Il ne décide rien, il ne contient aucune règle métier, il ne touche jamais à la base. C'est le serveur en salle : il prend la commande et la transmet en cuisine — il ne cuisine pas.</p>
+
+<h4>Les DTO — les formulaires officiels</h4>
+<p>Ce sont les <strong>seuls objets qui franchissent la porte</strong>, dans les deux sens. <code>CreerLivreRequete</code> définit exactement ce que le client a le droit d'envoyer (et les annotations <code>@NotBlank</code>, <code>@Pattern</code> le contrôlent à l'entrée) ; <code>LivreReponse</code> définit exactement ce que vous acceptez de montrer. Vos entités, elles, ne sortent jamais : on ne fait pas visiter la cuisine aux clients.</p>
+
+<h4>Le service — le cerveau</h4>
+<p>C'est <strong>lui qui décide</strong>. L'ISBN est-il déjà pris&nbsp;? La catégorie existe-t-elle&nbsp;? Peut-on enregistrer&nbsp;? Toutes les règles du métier vivent ici, et nulle part ailleurs. C'est aussi lui qui ouvre la transaction. Si un jour on vous demande «&nbsp;où est la règle qui interdit deux ISBN identiques&nbsp;?&nbsp;», la réponse est toujours la même : dans le service. C'est le chef de cuisine : la commande arrive, il vérifie, il tranche.</p>
+
+<h4>Le repository — le magasinier</h4>
+<p>C'est <strong>lui qui parle à la base</strong>, et personne d'autre. Vous déclarez une interface d'une ligne, et Spring Data JPA écrit le SQL à votre place : <code>save()</code>, <code>findById()</code>, <code>findAll()</code>, <code>deleteById()</code>. Il range et va chercher, sans jamais se demander si la demande est légitime — ce n'est pas son rôle, c'est celui du service. C'est le commis au garde-manger : on lui demande un ingrédient, il le rapporte, point.</p>
+
+<h4>Les entités — le miroir de la base</h4>
+<p>Une entité, c'est <strong>une table PostgreSQL vue depuis Java</strong> : la classe <code>Livre</code> = la table <code>livre</code>, un objet = une ligne, un attribut = une colonne. Les annotations <code>@Entity</code>, <code>@Column</code>, <code>@ManyToOne</code> apprennent à Hibernate la correspondance exacte avec votre MPD. C'est votre MCD qui a pris vie en code.</p>
+
+<h4>Les erreurs — le service réclamations</h4>
+<p>Quand le service détecte un problème, il lève une exception métier (<code>LivreIntrouvableException</code>…). Le <code>GestionnaireErreurs</code> les intercepte toutes au même endroit et les <strong>traduit en réponses HTTP propres</strong> : introuvable → <code>404</code>, ISBN en double → <code>409</code>, données invalides → <code>400</code>. Sans lui, le client recevrait un <code>500</code> illisible avec la pile d'erreur Java.</p>
+
+<div class="box key">
+<span class="lbl">🎯 La règle d'or de cette arborescence</span>
+<p>Une requête traverse <strong>toujours</strong> les couches dans le même ordre : <strong>contrôleur → service → repository → base</strong>, et la réponse remonte en sens inverse. Jamais de raccourci : un contrôleur qui appelle directement un repository, c'est un client qui va se servir dans le garde-manger. Ça marche un jour — c'est le chaos dès que l'application grossit.</p>
+</div>
+
 <h3>Le pom.xml</h3>
 
 <div class="meta">
